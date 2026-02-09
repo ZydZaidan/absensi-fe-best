@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Import semua halaman
 import LoginPage from './pages/LoginPage';
-import Register from './pages/Register';
+import Register from './pages/register';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Absensi from './pages/Absensi';
