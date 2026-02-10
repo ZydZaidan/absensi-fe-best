@@ -103,7 +103,7 @@ const Riwayat = () => {
         <section className="grid grid-cols-3 gap-4">
             <div className="bg-blue-600 p-6 rounded-4xl text-white shadow-xl shadow-blue-100">
                 <p className="text-[10px] font-bold uppercase opacity-60 mb-1">Hadir</p>
-                <p className="text-3xl font-black">{stats.hadir || 0 + stats.telat || 0}</p>
+                <p className="text-3xl font-black">{stats?.hadir || 0 + stats?.telat || 0}</p>
             </div>
             <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
                 <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Telat</p>
