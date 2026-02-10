@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Import semua halaman
 import LoginPage from './pages/LoginPage';
-import Register from './pages/Register'; // 1. Pastikan R besar jika nama filenya Register.jsx
+import Register from './pages/Register'; 
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Absensi from './pages/Absensi';
@@ -11,6 +11,8 @@ import AbsensiPulang from './pages/AbsensiPulang';
 import Izin from './pages/Izin';
 import Riwayat from './pages/Riwayat';
 import VerifikasiKaryawan from './pages/VerifikasiKaryawan';
+import RekapAbsensi from './pages/RekapAbsensi';
+
 
 const DashboardSelector = () => {
   const savedUser = localStorage.getItem('user');
@@ -39,7 +41,7 @@ function App() {
         
         {/* Rute Khusus Admin */}
         <Route path="/admin/verifikasi" element={<VerifikasiKaryawan />} />
-        <Route path="/admin/monitoring" element={<div>Halaman Peta Monitoring</div>} />
+        <Route path="/admin/rekap-absen" element={<RekapAbsensi />} />
 
         {/* 2. PINDAHKAN INI KE PALING BAWAH (Wildcard Catch-all) */}
         <Route path="*" element={<Navigate to="/" />} />
