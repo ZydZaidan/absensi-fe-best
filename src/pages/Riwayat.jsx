@@ -21,7 +21,7 @@ const Riwayat = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://127.0.0.1:8000/api/riwayat-absensi?month=${month}&year=${year}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/riwayat-absensi?month=${month}&year=${year}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -101,15 +101,15 @@ const Riwayat = () => {
 
         {/* SUMMARY CARDS */}
         <section className="grid grid-cols-3 gap-4">
-            <div className="bg-blue-600 p-6 rounded-[2rem] text-white shadow-xl shadow-blue-100">
+            <div className="bg-blue-600 p-6 rounded-4xl text-white shadow-xl shadow-blue-100">
                 <p className="text-[10px] font-bold uppercase opacity-60 mb-1">Hadir</p>
-                <p className="text-3xl font-black">{stats.hadir + stats.telat}</p>
+                <p className="text-3xl font-black">{stats.hadir || 0 + stats.telat || 0}</p>
             </div>
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
                 <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Telat</p>
                 <p className="text-3xl font-black text-rose-500">{stats.telat}</p>
             </div>
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
                 <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Izin</p>
                 <p className="text-3xl font-black text-amber-500">{stats.izin}</p>
             </div>
