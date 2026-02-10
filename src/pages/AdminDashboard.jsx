@@ -193,7 +193,7 @@ const AdminDashboard = () => {
           </button>
 
           {/* REKAPAN DATA KARYAWAN (Fungsi Melihat Semua Absen) */}
-          <button onClick={() => navigate('/admin/monitoring')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-purple-500 transition-all group active:scale-95">
+          <button onClick={() => navigate('/admin/rekap-absen')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-purple-500 transition-all group active:scale-95">
             <div className="bg-purple-50 p-5 rounded-2xl mb-5 group-hover:bg-purple-600 transition-colors">
               <Users className="w-7 h-7 text-purple-600 group-hover:text-white" />
             </div>
