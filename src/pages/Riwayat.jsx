@@ -157,10 +157,6 @@ const Riwayat = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            <button className="hidden md:flex p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
                         </div>
                     ))}
                 </div>
