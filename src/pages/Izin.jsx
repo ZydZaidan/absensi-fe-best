@@ -4,6 +4,8 @@ import {
   ArrowLeft, FileText, Calendar, 
   Upload, CheckCircle, AlertCircle, Loader2 
 } from 'lucide-react';
+import axios from 'axios';
+
 
 const Izin = () => {
   const navigate = useNavigate();
@@ -28,15 +30,43 @@ const Izin = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.jenis_izin) return alert("Pilih jenis izin!");
+    
     setLoading(true);
-    setTimeout(() => {
-        alert("Pengajuan berhasil dikirim!");
-        navigate('/dashboard');
-        setLoading(false);
-    }, 1500);
+    try {
+      const token = localStorage.getItem('token');
+      
+      // 1. Gunakan FormData untuk mengirim File
+      const data = new FormData();
+      data.append('jenis_izin', formData.jenis_izin);
+      data.append('tanggal', formData.tanggal);
+      data.append('keterangan', formData.keterangan);
+      
+      // Pastikan append file jika ada
+      if (formData.dokumen) {
+        data.append('dokumen', formData.dokumen);
+      }
+
+      // 2. Kirim ke API Laravel
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/pengajuan-zin`, data, {
+        headers: { 
+          'Content-Type': 'multipart/form-data', // Wajib untuk upload file
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+
+      if (response.data.success) {
+          alert("Pengajuan berhasil dikirim dan otomatis tercatat di absensi!");
+          navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengirim pengajuan: " + (err.response?.data?.message || "Terjadi kesalahan"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
