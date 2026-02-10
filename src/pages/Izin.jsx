@@ -50,7 +50,7 @@ const handleSubmit = async (e) => {
       }
 
       // 2. Kirim ke API Laravel
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/pengajuan-zin`, data, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/pengajuan-izin`, data, {
         headers: { 
           'Content-Type': 'multipart/form-data', // Wajib untuk upload file
           'Authorization': `Bearer ${token}` 
