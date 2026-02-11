@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import bgBest from '../assets/images/bgBest.jpg';
+import { Eye, EyeOff } from 'lucide-react'; // 1. Tambahkan import icon
 
 const Register = () => {
   const navigate = useNavigate();
-
+    const [showPassword, setShowPassword] = useState(false); // 2. State untuk show/hide
+  
   // 1. Inisialisasi State (Gunakan satu objek untuk semua input)
   const [formData, setFormData] = useState({
     email: '',
@@ -148,17 +150,35 @@ const Register = () => {
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 ml-1">Buat Password</label>
-            <input 
-              required 
-              name="password" 
-              type="password" 
-              placeholder="••••••••" 
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-gray-50 border outline-none focus:border-blue-500 transition-all" 
-            />
-          </div>
+  <label className="block text-sm font-semibold text-gray-700 ml-1">Buat Password</label>
+  
+  {/* Container relative agar tombol mata bisa melayang di dalam input */}
+  <div className="relative mt-1">
+    <input 
+      required 
+      name="password" 
+      // Tipe berubah dinamis berdasarkan state
+      type={showPassword ? 'text' : 'password'} 
+      placeholder="••••••••" 
+      value={formData.password}
+      onChange={handleChange}
+      // Tambahkan pr-12 agar teks tidak menabrak icon mata
+      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-blue-500 transition-all pr-12 font-medium" 
+    />
+    
+    {/* Tombol Icon Mata */}
+    <button
+      type="button" // WAJIB: Agar tidak men-submit form pendaftaran
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
+    >
+      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+
+  {/* Sub-teks panduan password */}
+  <p className="text-[10px] text-gray-400 mt-2 ml-1 font-medium italic">Min. 8 characters</p>
+</div>
 
           <div className="pt-6">
             <button 
