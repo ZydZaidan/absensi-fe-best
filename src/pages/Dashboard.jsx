@@ -163,39 +163,52 @@ const Dashboard = () => {
         {/* MAIN BUTTONS */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6" >
           {!todayData ? (
-            // 1. SKENARIO: BELUM ABSEN (Tombol Biru)
-            <button 
-              onClick={() => navigate('/absensi')}
-              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
-            >
-              <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
-                <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
-              </div>
-              <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Sekarang</span>
-            </button>
-          ) : !todayData.jam_pulang ? (
-            // 2. SKENARIO: SUDAH MASUK, TAPI BELUM PULANG (Tombol Oranye)
-            <button 
-              onClick={() => navigate('/absensi-pulang')} 
-              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
-            >
-              <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
-                <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
-              </div>
-              <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
-            </button>
-          ) : (
-            // 3. SKENARIO: SUDAH PULANG (Tombol Abu-abu / Mati)
-            <button 
-              disabled
-              className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
-            >
-              <div className="bg-slate-200 p-5 rounded-2xl mb-5">
-                <CheckCircle className="w-7 h-7 text-slate-400" />
-              </div>
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
-            </button>
-          )}
+    // 1. BELUM ABSEN MASUK
+          <button 
+            onClick={() => navigate('/absensi')}
+            className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
+          >
+            <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
+              <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
+            </div>
+            <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Masuk</span>
+          </button>
+        ) : todayData.jam_pulang ? (
+          // 2. SUDAH PULANG (TOMBOL MATI)
+          <button 
+            disabled
+            className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
+          >
+            <div className="bg-slate-200 p-5 rounded-2xl mb-5">
+              <CheckCircle className="w-7 h-7 text-slate-400" />
+            </div>
+            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
+          </button>
+        ) : todayData.status_pulang_cepat === 'pending' ? (
+          // 3. SEDANG MENUNGGU ACC ADMIN (TOMBOL DISABLE)
+          <button 
+            disabled
+            className="flex flex-col items-center justify-center bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100 opacity-80 cursor-wait"
+          >
+            <div className="bg-amber-100 p-5 rounded-2xl mb-5 animate-pulse">
+              <Clock className="w-7 h-7 text-amber-600" />
+            </div>
+            <span className="text-[10px] font-black text-amber-700 uppercase tracking-tighter text-center">
+              Menunggu Persetujuan <br/> Pulang Cepat...
+            </span>
+          </button>
+        ) : (
+          // 4. SUDAH MASUK & BOLEH KLIK PULANG (Termasuk jika ditolak admin sebelumnya)
+          <button 
+            onClick={() => navigate('/absensi-pulang')} 
+            className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
+          >
+            <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
+              <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
+            </div>
+            <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
+          </button>
+        )}
 
           <button onClick={() => navigate('/izin')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-emerald-500 transition-all group active:scale-95">
             <div className="bg-emerald-50 p-5 rounded-2xl mb-5 group-hover:bg-emerald-600 transition-colors">
