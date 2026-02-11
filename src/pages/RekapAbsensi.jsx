@@ -4,7 +4,7 @@ import axios from 'axios';
 import { 
   ArrowLeft, Search, Filter, 
   Loader2, Calendar, MapPin, 
-  Camera, X, ImageOff, User
+  Camera, X, ImageOff 
 } from 'lucide-react';
 
 const RekapAbsensi = () => {
@@ -17,6 +17,7 @@ const RekapAbsensi = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewTitle, setPreviewTitle] = useState("");
 
+  // State Filter
   const [filter, setFilter] = useState({
     bulan: new Date().getMonth() + 1,
     tahun: new Date().getFullYear(),
@@ -25,18 +26,20 @@ const RekapAbsensi = () => {
     id_cabang: ''
   });
 
-  // Ambil List Cabang
+  // 1. Ambil Daftar Cabang untuk Dropdown
   useEffect(() => {
     const fetchCabang = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/cabang`);
         setDaftarCabang(response.data.data || []);
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error("Gagal ambil list cabang", err);
+      }
     };
     fetchCabang();
   }, []);
 
-  // Ambil Data Rekap
+  // 2. Fetch Data Rekapitulasi (Otomatis panggil jika filter berubah)
   useEffect(() => {
     const fetchRekap = async () => {
       setLoading(true);
@@ -48,19 +51,23 @@ const RekapAbsensi = () => {
         });
         setData(response.data.data || []);
       } catch (err) {
+        console.error("Gagal mengambil data rekap:", err);
         if (err.response?.status === 401) {
             localStorage.clear();
             navigate('/');
         }
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchRekap();
   }, [filter, navigate]);
 
-  // Fungsi memicu popup foto
+  // Fungsi untuk membuka Modal Foto
   const openPreview = (url, type) => {
     setSelectedImage(url);
-    setPreviewTitle(type === 'masuk' ? 'Bukti Absen Masuk' : 'Bukti Absen Pulang');
+    setPreviewTitle(type === 'masuk' ? 'Bukti Foto Masuk' : 'Bukti Foto Pulang');
   };
 
   return (
@@ -72,7 +79,7 @@ const RekapAbsensi = () => {
           <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-all group">
             <ArrowLeft className="w-5 h-5 text-slate-600 group-hover:text-blue-600" />
           </button>
-          <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter">Monitoring Absensi Global</h1>
+          <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter">Rekapitulasi Absensi Global</h1>
         </div>
       </header>
 
@@ -114,8 +121,8 @@ const RekapAbsensi = () => {
           </div>
 
           <div className="flex items-end">
-            <button className="w-full p-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 active:scale-95">
-              <Search className="w-4 h-4" /> Cari
+            <button className="w-full p-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+              <Search className="w-4 h-4" /> Cari Data
             </button>
           </div>
         </section>
@@ -131,29 +138,30 @@ const RekapAbsensi = () => {
                   <th className="px-8 py-6 text-center">Masuk / Pulang</th>
                   <th className="px-8 py-6 text-center">Bukti Foto</th>
                   <th className="px-8 py-6 text-center">Status</th>
-                  <th className="px-8 py-6">Cabang</th>
+                  <th className="px-8 py-6">Cabang Kantor</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 font-medium">
                 {loading ? (
-                  <tr><td colSpan="6" className="py-24 text-center"><Loader2 className="animate-spin mx-auto text-blue-600 mb-2" /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Memuat Data...</p></td></tr>
+                  <tr><td colSpan="6" className="py-24 text-center"><Loader2 className="animate-spin mx-auto text-blue-600 mb-2" /><p className="text-[10px] font-black text-slate-400 uppercase">Sinkronisasi Data...</p></td></tr>
                 ) : data.length > 0 ? data.map((row, i) => (
                   <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-5">
+                      {/* Menggunakan nama_karyawan sesuai instruksi BE */}
                       <p className="font-black text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{row.nama_karyawan}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{row.user?.jabatan || 'Staff'}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">{row.user?.jabatan || '-'}</p>
                     </td>
-                    <td className="px-8 py-5 text-center text-xs font-bold text-slate-600 uppercase">
+                    <td className="px-8 py-5 text-center text-xs font-bold text-slate-600">
                       {row.tanggal_absen ? new Date(row.tanggal_absen).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric'}) : '-'}
                     </td>
-                    <td className="px-8 py-5 text-center text-sm font-black text-slate-700 tracking-tighter">
+                    <td className="px-8 py-5 text-center text-sm font-black text-slate-700">
                         {row.jam_masuk?.slice(0,5) || '--:--'} <span className="text-slate-200 mx-1">|</span> {row.jam_pulang?.slice(0,5) || '--:--'}
                     </td>
                     
-                    {/* KOLOM 2 BUTTON FOTO BUKTI */}
+                    {/* KOLOM BUKTI FOTO (DENGAN 2 TOMBOL SESUAI REQUEST) */}
                     <td className="px-8 py-5 text-center">
                         <div className="flex justify-center gap-2">
-                            {/* Tombol Foto Masuk (Biru) */}
+                            {/* Bukti Masuk (Biru) */}
                             {row.foto_masuk_url ? (
                                 <button 
                                   onClick={() => openPreview(row.foto_masuk_url, 'masuk')} 
@@ -164,7 +172,7 @@ const RekapAbsensi = () => {
                                 </button>
                             ) : <div className="p-2.5 bg-slate-50 text-slate-200 rounded-xl"><ImageOff className="w-4 h-4" /></div>}
 
-                            {/* Tombol Foto Pulang (Oranye) */}
+                            {/* Bukti Pulang (Oranye) */}
                             {row.foto_pulang_url ? (
                                 <button 
                                   onClick={() => openPreview(row.foto_pulang_url, 'pulang')} 
@@ -186,11 +194,14 @@ const RekapAbsensi = () => {
                       </span>
                     </td>
                     <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase italic">
-                        <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Kantor Pusat'}</div>
+                        <div className="flex items-center gap-1.5">
+                            <MapPin className="w-3 h-3 text-blue-400" />
+                            {row.user?.branch?.nama_cabang || 'Kantor Pusat'}
+                        </div>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="6" className="py-24 text-center text-slate-300 font-black uppercase text-xs italic tracking-widest">Data tidak ditemukan</td></tr>
+                  <tr><td colSpan="6" className="py-24 text-center text-slate-300 font-black uppercase text-xs italic tracking-widest">Belum ada data absensi</td></tr>
                 )}
               </tbody>
             </table>
@@ -198,13 +209,13 @@ const RekapAbsensi = () => {
         </section>
       </main>
 
-      {/* POPUP PREVIEW FOTO */}
+      {/* POPUP PREVIEW FOTO (MODAL) */}
       {selectedImage && (
-        <div className="fixed inset-0 z-2000 flex items-center justify-center p-4">
-            {/* Backdrop dengan Blur */}
-            <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onClick={() => setSelectedImage(null)}></div>
+        <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 md:p-8">
+            {/* Overlay Backdrop */}
+            <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setSelectedImage(null)}></div>
             
-            {/* Image Container */}
+            {/* Modal Container */}
             <div className="relative bg-white p-2 rounded-4xl shadow-2xl max-w-sm w-full animate-in zoom-in duration-300">
                 <button 
                     onClick={() => setSelectedImage(null)}
@@ -213,17 +224,20 @@ const RekapAbsensi = () => {
                     <X className="w-6 h-6" />
                 </button>
                 
-                <div className="rounded-4xl overflow-hidden bg-slate-100 aspect-3/4">
+                <div className="rounded-2rem overflow-hidden bg-slate-100 aspect-3/4">
                     <img 
                         src={selectedImage} 
                         alt="Bukti Absensi" 
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                            e.target.src = "https://placehold.co/600x800?text=Gambar+Rusak/Pecah";
+                        }}
                     />
                 </div>
 
                 <div className="p-6 text-center">
                     <h3 className="font-black text-slate-800 uppercase tracking-tighter text-lg">{previewTitle}</h3>
-                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Verifikasi Biometrik PT BEST</p>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Verifikasi Keaslian PT BEST</p>
                 </div>
             </div>
         </div>
