@@ -191,7 +191,13 @@ const AdminDashboard = () => {
             </div>
             <span className="text-xs font-black text-emerald-900 uppercase tracking-widest text-center">Verifikasi Karyawan</span>
           </button>
-
+          {/* TOMBOL BARU: PERSETUJUAN PULANG CEPAT */}
+          <button onClick={() => navigate('/admin/persetujuan-pulang-cepat')} className="flex flex-col items-center justify-center bg-white p-6 rounded-4xl shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95">
+            <div className="bg-orange-50 p-4 rounded-2xl mb-3 group-hover:bg-orange-600 transition-colors">
+              <Clock className="w-5 h-5 text-orange-600 group-hover:text-white" />
+            </div>
+            <span className="text-[10px] font-black text-orange-900 uppercase tracking-widest text-center">Persetujuan Pulang</span>
+          </button>
           {/* REKAPAN DATA KARYAWAN (Fungsi Melihat Semua Absen) */}
           <button onClick={() => navigate('/admin/rekap-absen')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-purple-500 transition-all group active:scale-95">
             <div className="bg-purple-50 p-5 rounded-2xl mb-5 group-hover:bg-purple-600 transition-colors">

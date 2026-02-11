@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // Import semua halaman
 import LoginPage from './pages/LoginPage';
-import Register from './pages/Register'; 
+import Register from './pages/DaftarKaryawan'; 
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Absensi from './pages/Absensi';
@@ -12,6 +12,8 @@ import Izin from './pages/Izin';
 import Riwayat from './pages/Riwayat';
 import VerifikasiKaryawan from './pages/VerifikasiKaryawan';
 import RekapAbsensi from './pages/RekapAbsensi';
+import PersetujuanPulangCepat from './pages/PersetujuanPulangCepat';
+
 
 
 const DashboardSelector = () => {
@@ -42,6 +44,7 @@ function App() {
         {/* Rute Khusus Admin */}
         <Route path="/admin/verifikasi" element={<VerifikasiKaryawan />} />
         <Route path="/admin/rekap-absen" element={<RekapAbsensi />} />
+        <Route path="/admin/persetujuan-pulang-cepat" element={<PersetujuanPulangCepat />} />
 
         {/* 2. PINDAHKAN INI KE PALING BAWAH (Wildcard Catch-all) */}
         <Route path="*" element={<Navigate to="/" />} />
