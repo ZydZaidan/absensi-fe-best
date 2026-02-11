@@ -122,7 +122,7 @@ const PersetujuanPulangCepat = () => {
                       <div className="flex gap-3 bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
                          <MessageSquare className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
                          <p className="text-xs text-orange-800 leading-relaxed italic font-bold">
-                            "{req.alasan || 'Tidak ada alasan terlampir'}"
+                            "{req.alasan_pulang_cepat || 'Tidak ada alasan terlampir'}"
                          </p>
                       </div>
                     </td>
