@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // 1. Pastikan axios di-import
+import axios from 'axios'; 
 import { 
   Camera, Clock, CheckCircle, 
   Calendar, Settings, LogOut, User, Loader2
@@ -14,28 +14,31 @@ const Dashboard = () => {
   const [userData] = useState(() => JSON.parse(localStorage.getItem('user')));
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // UPDATE: State untuk Data API
+  // State untuk Data API
   const [stats, setStats] = useState({ hadir: 0, izin: 0, alpha: 0 });
   const [history, setHistory] = useState([]);
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // UPDATE: Ambil Data dari Backend saat halaman dibuka
+  // Ambil Data dari Backend saat halaman dibuka
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        // Ambil Status Hari Ini & Riwayat (termasuk stats) secara paralel
+        // Ambil Status Hari Ini & Riwayat secara paralel
         const [resStatus, resHistory] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/attendance/check-status`, config),
           axios.get(`${import.meta.env.VITE_API_URL}/riwayat-absensi`, config)
         ]);
 
-        setTodayData(resStatus.data.data); // Simpan info absen hari ini
-        setHistory(resHistory.data.data);   // Simpan list riwayat
-        setStats(resHistory.data.stats);     // Simpan angka stats (hadir, izin, dll)
+        // DEBUGGING: Aktifkan ini jika tombol masih belum ter-disable
+        // console.log("Status Absen Hari Ini:", resStatus.data.data);
+
+        setTodayData(resStatus.data.data); 
+        setHistory(resHistory.data.data || []);   
+        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0 });
       } catch (err) {
         console.error("Gagal mengambil data dashboard", err);
         if (err.response?.status === 401) {
@@ -62,7 +65,7 @@ const Dashboard = () => {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
         <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
-        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Memuat Data...</p>
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Sinkronisasi Data...</p>
       </div>
     );
   }
@@ -105,13 +108,12 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* INNER BOX: STATUS KEHADIRAN (DINAMIS) */}
           <div className="mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl p-8">
             <div className="flex items-center gap-3 mb-6">
-              {/* Bulatan Hijau jika sudah absen, Merah jika belum */}
+              {/* Logika Status Visual */}
               <div className={`w-3 h-3 rounded-full animate-pulse ${todayData ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
               <span className="text-xl font-black italic tracking-wide">
-                {todayData ? 'Sudah Masuk' : 'Belum Absen'}
+                {todayData ? (todayData.jam_pulang ? 'Absensi Selesai' : 'Sudah Masuk') : 'Belum Absen'}
               </span>
             </div>
 
@@ -120,7 +122,6 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <p className="text-[10px] uppercase font-bold opacity-60">Jam Masuk</p>
-                {/* Tampilkan jam_masuk dari DB atau --:-- */}
                 <p className="text-2xl font-black tracking-tight">
                   {todayData?.jam_masuk ? todayData.jam_masuk.slice(0, 5) : '-- : --'}
                 </p>      
@@ -135,7 +136,7 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* STATISTIK (DINAMIS) */}
+        {/* STATISTIK */}
         <section className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
           <div className="flex justify-around items-center">
             <div className="text-center flex-1">
@@ -145,70 +146,70 @@ const Dashboard = () => {
             <div className="w-px h-10 bg-slate-100"></div>
             <div className="text-center flex-1">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Izin</p>
-              <p className="text-2xl font-black text-amber-500">{stats.izin}</p>
+              <p className="text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
             </div>
             <div className="w-px h-10 bg-slate-100"></div>
             <div className="text-center flex-1">
               <p className="text-[10px] uppercase font-bold opacity-40">Terlambat</p>
-              <p className="text-2xl font-black text-rose-400">{stats?.telat || 0}</p>
+              <p className="text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
             <div className="w-px h-10 bg-slate-100"></div>
             <div className="text-center flex-1">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-              <p className="text-2xl font-black text-rose-500">0</p>
+              <p className="text-2xl font-black text-slate-300">0</p>
             </div>
           </div>
         </section>
 
-        {/* MAIN BUTTONS */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6" >
+        {/* MAIN BUTTONS (LOGIKA PERBAIKAN DI SINI) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {!todayData ? (
-    // 1. BELUM ABSEN MASUK
-          <button 
-            onClick={() => navigate('/absensi')}
-            className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
-          >
-            <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
-              <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
-            </div>
-            <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Masuk</span>
-          </button>
-        ) : todayData.jam_pulang ? (
-          // 2. SUDAH PULANG (TOMBOL MATI)
-          <button 
-            disabled
-            className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
-          >
-            <div className="bg-slate-200 p-5 rounded-2xl mb-5">
-              <CheckCircle className="w-7 h-7 text-slate-400" />
-            </div>
-            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
-          </button>
-        ) : todayData.status_pulang_cepat === 'pending' ? (
-          // 3. SEDANG MENUNGGU ACC ADMIN (TOMBOL DISABLE)
-          <button 
-            disabled
-            className="flex flex-col items-center justify-center bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100 opacity-80 cursor-wait"
-          >
-            <div className="bg-amber-100 p-5 rounded-2xl mb-5 animate-pulse">
-              <Clock className="w-7 h-7 text-amber-600" />
-            </div>
-            <span className="text-[10px] font-black text-amber-700 uppercase tracking-tighter text-center">
-              Menunggu Persetujuan <br/> Pulang Cepat...
-            </span>
-          </button>
-        ) : (
-          // 4. SUDAH MASUK & BOLEH KLIK PULANG (Termasuk jika ditolak admin sebelumnya)
-          <button 
-            onClick={() => navigate('/absensi-pulang')} 
-            className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
-          >
-            <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
-              <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
-            </div>
-            <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
-          </button>
-        )}
+            // 1. BELUM ABSEN MASUK
+            <button 
+              onClick={() => navigate('/absensi')}
+              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
+            >
+              <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
+                <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
+              </div>
+              <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Masuk</span>
+            </button>
+          ) : todayData.jam_pulang ? (
+            // 2. SUDAH PULANG (TOMBOL MATI)
+            <button 
+              disabled
+              className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
+            >
+              <div className="bg-slate-200 p-5 rounded-2xl mb-5">
+                <CheckCircle className="w-7 h-7 text-slate-400" />
+              </div>
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
+            </button>
+          ) : todayData.status_pulang_cepat === 'pending' ? (
+            // 3. SEDANG MENUNGGU ACC ADMIN (TOMBOL DISABLE)
+            <button 
+              disabled
+              className="flex flex-col items-center justify-center bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100 opacity-80 cursor-wait"
+            >
+              <div className="bg-amber-100 p-5 rounded-2xl mb-5 animate-pulse">
+                <Clock className="w-7 h-7 text-amber-600" />
+              </div>
+              <span className="text-[10px] font-black text-amber-700 uppercase tracking-tighter text-center">
+                Menunggu Persetujuan <br/> Pulang Cepat...
+              </span>
+            </button>
+          ) : (
+            // 4. SUDAH MASUK & BOLEH KLIK PULANG (Termasuk jika ditolak admin sebelumnya)
+            <button 
+              onClick={() => navigate('/absensi-pulang')} 
+              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
+            >
+              <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
+                <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
+              </div>
+              <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
+            </button>
+          )}
 
           <button onClick={() => navigate('/izin')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-emerald-500 transition-all group active:scale-95">
             <div className="bg-emerald-50 p-5 rounded-2xl mb-5 group-hover:bg-emerald-600 transition-colors">
@@ -225,7 +226,7 @@ const Dashboard = () => {
           </button>
         </section>
 
-        {/* AKTIVITAS TERAKHIR (LOOPING DARI DATABASE) */}
+        {/* HISTORY LIST */}
         <section className="space-y-6 pt-4">
           <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest px-2">History Absensi</h3>
           <div className="space-y-4">
@@ -233,7 +234,6 @@ const Dashboard = () => {
               <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-5">
                   <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
-                    {/* Mengambil tanggal dari format YYYY-MM-DD */}
                     <span className="text-lg font-black leading-none">{new Date(item.tanggal_absen).getDate()}</span>
                     <span className="text-[8px] font-bold uppercase">{new Date(item.tanggal_absen).toLocaleString('id-ID', {month: 'short'})}</span>
                   </div>
@@ -246,12 +246,12 @@ const Dashboard = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-black text-slate-800">
-                    {item.jam_masuk ? item.jam_masuk.slice(0, 5) : '--:--'}
+                    {item.jam_masuk?.slice(0, 5) || '--:--'}
                   </p>
                 </div>
               </div>
             )) : (
-              <p className="text-center text-slate-400 py-10">Belum ada riwayat absen.</p>
+              <p className="text-center text-slate-400 py-10 italic">Belum ada riwayat absen untuk bulan ini.</p>
             )}
           </div>
         </section>
