@@ -15,40 +15,32 @@ const Dashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // State untuk Data API
-  const [stats, setStats] = useState({ hadir: 0, izin: 0, telat: 0, alpha: 0 });
+  const [stats, setStats] = useState({ hadir: 0, izin: 0, alpha: 0 });
   const [history, setHistory] = useState([]);
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fungsi ambil data dari Backend
+  // Ambil Data dari Backend saat halaman dibuka
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        // Panggil Status Hari Ini & Riwayat secara paralel
+        // Ambil Status Hari Ini & Riwayat secara paralel
         const [resStatus, resHistory] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/attendance/check-status`, config),
           axios.get(`${import.meta.env.VITE_API_URL}/riwayat-absensi`, config)
         ]);
 
-        // 1. PERBAIKAN: Ambil data absen hari ini
-        const currentAbsen = resStatus.data.data;
-        setTodayData(currentAbsen); 
+        // DEBUGGING: Aktifkan ini jika tombol masih belum ter-disable
+        // console.log("Status Absen Hari Ini:", resStatus.data.data);
 
-        // 2. PERBAIKAN: Ambil koordinat kantor (BE merubah 'branch' menjadi 'cabang')
-        // Simpan ke localStorage agar bisa dipakai di page Absensi & AbsensiPulang
-        if (resStatus.data.branch) { // BE mengirim objek 'branch' (hasil relasi)
-            localStorage.setItem('office_location', JSON.stringify(resStatus.data.branch));
-        }
-
-        // 3. PERBAIKAN: BE mengirim stats di dalam resHistory.data.stats
-        setHistory(resHistory.data.data || []);
+        setTodayData(resStatus.data.data); 
+        setHistory(resHistory.data.data || []);   
         setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0 });
-
       } catch (err) {
-        console.error("Gagal sinkronisasi dashboard", err);
+        console.error("Gagal mengambil data dashboard", err);
         if (err.response?.status === 401) {
           localStorage.clear();
           navigate('/');
@@ -73,7 +65,7 @@ const Dashboard = () => {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
         <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
-        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Menyinkronkan Data...</p>
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Sinkronisasi Data...</p>
       </div>
     );
   }
@@ -118,7 +110,8 @@ const Dashboard = () => {
 
           <div className="mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className={`w-3 h-3 rounded-full animate-pulse ${todayData ? (todayData.jam_pulang ? 'bg-blue-400' : 'bg-emerald-400') : 'bg-rose-400'}`}></div>
+              {/* Logika Status Visual */}
+              <div className={`w-3 h-3 rounded-full animate-pulse ${todayData ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
               <span className="text-xl font-black italic tracking-wide">
                 {todayData ? (todayData.jam_pulang ? 'Absensi Selesai' : 'Sudah Masuk') : 'Belum Absen'}
               </span>
@@ -128,13 +121,13 @@ const Dashboard = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold opacity-60 tracking-widest">Jam Masuk</p>
+                <p className="text-[10px] uppercase font-bold opacity-60">Jam Masuk</p>
                 <p className="text-2xl font-black tracking-tight">
                   {todayData?.jam_masuk ? todayData.jam_masuk.slice(0, 5) : '-- : --'}
                 </p>      
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold opacity-60 tracking-widest">Jam Pulang</p>
+                <p className="text-[10px] uppercase font-bold opacity-60">Jam Pulang</p>
                 <p className="text-2xl font-black tracking-tight opacity-30">
                   {todayData?.jam_pulang ? todayData.jam_pulang.slice(0,5) : '-- : --'}
                 </p>
@@ -143,7 +136,7 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* STATISTIK (Update Mapping sesuai Note BE) */}
+        {/* STATISTIK */}
         <section className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
           <div className="flex justify-around items-center">
             <div className="text-center flex-1">
@@ -157,7 +150,7 @@ const Dashboard = () => {
             </div>
             <div className="w-px h-10 bg-slate-100"></div>
             <div className="text-center flex-1">
-              <p className="text-[10px] uppercase font-bold opacity-40 tracking-widest mb-1">Terlambat</p>
+              <p className="text-[10px] uppercase font-bold opacity-40">Terlambat</p>
               <p className="text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
             <div className="w-px h-10 bg-slate-100"></div>
@@ -168,49 +161,53 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* MAIN BUTTONS */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6" >
+        {/* MAIN BUTTONS (LOGIKA PERBAIKAN DI SINI) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {!todayData ? (
+            // 1. BELUM ABSEN MASUK
             <button 
-                onClick={() => navigate('/absensi')}
-                className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
+              onClick={() => navigate('/absensi')}
+              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
             >
-                <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
-                    <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
-                </div>
-                <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Masuk</span>
+              <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
+                <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
+              </div>
+              <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Masuk</span>
             </button>
           ) : todayData.jam_pulang ? (
+            // 2. SUDAH PULANG (TOMBOL MATI)
             <button 
-                disabled
-                className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
+              disabled
+              className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
             >
-                <div className="bg-slate-200 p-5 rounded-2xl mb-5">
-                    <CheckCircle className="w-7 h-7 text-slate-400" />
-                </div>
-                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
+              <div className="bg-slate-200 p-5 rounded-2xl mb-5">
+                <CheckCircle className="w-7 h-7 text-slate-400" />
+              </div>
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
             </button>
           ) : todayData.status_pulang_cepat === 'pending' ? (
+            // 3. SEDANG MENUNGGU ACC ADMIN (TOMBOL DISABLE)
             <button 
-                disabled
-                className="flex flex-col items-center justify-center bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100 opacity-80 cursor-wait"
+              disabled
+              className="flex flex-col items-center justify-center bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100 opacity-80 cursor-wait"
             >
-                <div className="bg-amber-100 p-5 rounded-2xl mb-5 animate-pulse">
-                    <Clock className="w-7 h-7 text-amber-600" />
-                </div>
-                <span className="text-[10px] font-black text-amber-700 uppercase tracking-tighter text-center">
-                    Menunggu Persetujuan <br/> Pulang Cepat...
-                </span>
+              <div className="bg-amber-100 p-5 rounded-2xl mb-5 animate-pulse">
+                <Clock className="w-7 h-7 text-amber-600" />
+              </div>
+              <span className="text-[10px] font-black text-amber-700 uppercase tracking-tighter text-center">
+                Menunggu Persetujuan <br/> Pulang Cepat...
+              </span>
             </button>
           ) : (
+            // 4. SUDAH MASUK & BOLEH KLIK PULANG (Termasuk jika ditolak admin sebelumnya)
             <button 
-                onClick={() => navigate('/absensi-pulang')} 
-                className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
+              onClick={() => navigate('/absensi-pulang')} 
+              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
             >
-                <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
-                    <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
-                </div>
-                <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
+              <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
+                <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
+              </div>
+              <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
             </button>
           )}
 
@@ -234,14 +231,14 @@ const Dashboard = () => {
           <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest px-2">History Absensi</h3>
           <div className="space-y-4">
             {history.length > 0 ? history.map((item, i) => (
-              <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow group">
+              <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-5">
                   <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
                     <span className="text-lg font-black leading-none">{new Date(item.tanggal_absen).getDate()}</span>
                     <span className="text-[8px] font-bold uppercase">{new Date(item.tanggal_absen).toLocaleString('id-ID', {month: 'short'})}</span>
                   </div>
                   <div>
-                    <p className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors">Absen {item.jam_pulang ? 'Selesai' : 'Masuk'}</p>
+                    <p className="text-sm font-black text-slate-800">Absen {item.jam_pulang ? 'Selesai' : 'Masuk'}</p>
                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
                       {item.status === 'hadir' ? 'TEPAT WAKTU' : 'TERLAMBAT'}
                     </p>
@@ -254,7 +251,7 @@ const Dashboard = () => {
                 </div>
               </div>
             )) : (
-              <p className="text-center text-slate-400 py-10 italic">Belum ada riwayat absen.</p>
+              <p className="text-center text-slate-400 py-10 italic">Belum ada riwayat absen untuk bulan ini.</p>
             )}
           </div>
         </section>
