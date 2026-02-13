@@ -42,7 +42,16 @@ const Absensi = () => {
   const [loading, setLoading] = useState(false);
 
   // Koordinat Kantor (Testing)
-  const OFFICE_COORDS = useMemo(() => ({ lat: -6.245358520910364, lng: 106.87237966608049 }), []); 
+  // Ganti koordinat manual menjadi ambil dari memori (LocalStorage)
+  const OFFICE_COORDS = useMemo(() => {
+    const savedOffice = localStorage.getItem('office_location');
+    if (savedOffice) {
+      const office = JSON.parse(savedOffice);
+      return { lat: parseFloat(office.latitude), lng: parseFloat(office.longitude) };
+    }
+    // Fallback jika data belum ada (koordinat pusat Jakarta)
+    return { lat: -6.1751, lng: 106.8272 };
+  }, []); 
   
   // Logika Cek Terlambat (WIB)
   const isLate = useMemo(() => {
