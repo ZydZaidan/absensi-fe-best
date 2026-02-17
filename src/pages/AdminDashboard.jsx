@@ -187,79 +187,79 @@ const AdminDashboard = () => {
         </section>
 
         {/* ACTION BUTTONS (Mobile: 2 Baris 3-2 | Desktop: 1 Baris Melebar) */}
-<section className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100">
-  
-  {/* 
-      - flex-wrap: agar bisa turun ke baris baru di HP
-      - lg:flex-nowrap: memaksa 1 baris di Desktop
-      - justify-center: agar simetris di HP
-      - lg:justify-between: agar melebar di Desktop
-  */}
-  <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-y-10 gap-x-2 md:gap-x-6">
-    
-    {/* 1. ABSEN (Dinamis) */}
-    {/* w-[30%] memaksa 3 tombol di baris pertama pada HP */}
-    <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
-      {!todayData ? (
-        <button onClick={() => navigate('/absensi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100 hover:bg-blue-600 hover:text-white group">
-          <Camera className="w-7 h-7 sm:w-8 sm:h-8" />
-        </button>
-      ) : todayData.jam_pulang ? (
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center border-2 border-slate-100">
-          <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8" />
-        </div>
-      ) : (
-        <button onClick={() => navigate('/absensi-pulang')} className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100 hover:bg-orange-600 hover:text-white">
-          <Camera className="w-7 h-7 sm:w-8 sm:h-8" />
-        </button>
-      )}
-      <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center">
-        {todayData ? (todayData.jam_pulang ? 'Selesai' : 'Pulang') : 'Absen'}
-      </span>
-    </div>
+        <section>
+          
+          {/* 
+              - flex-wrap: agar bisa turun ke baris baru di HP
+              - lg:flex-nowrap: memaksa 1 baris di Desktop
+              - justify-center: agar simetris di HP
+              - lg:justify-between: agar melebar di Desktop
+          */}
+          <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-y-10 gap-x-2 md:gap-x-6">
+            
+            {/* 1. ABSEN (Dinamis) */}
+            {/* w-[30%] memaksa 3 tombol di baris pertama pada HP */}
+            <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
+              {!todayData ? (
+                <button onClick={() => navigate('/absensi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100 hover:bg-blue-600 hover:text-white group">
+                  <Camera className="w-7 h-7 sm:w-8 sm:h-8" />
+                </button>
+              ) : todayData.jam_pulang ? (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center border-2 border-slate-100">
+                  <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8" />
+                </div>
+              ) : (
+                <button onClick={() => navigate('/absensi-pulang')} className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100 hover:bg-orange-600 hover:text-white">
+                  <Camera className="w-7 h-7 sm:w-8 sm:h-8" />
+                </button>
+              )}
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center">
+                {todayData ? (todayData.jam_pulang ? 'Selesai' : 'Pulang') : 'Absen'}
+              </span>
+            </div>
 
-    {/* 2. IZIN / SAKIT */}
-    <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
-      <button onClick={() => navigate('/izin')} className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white">
-        <Calendar className="w-7 h-7 sm:w-8 sm:h-8" />
-      </button>
-      <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Izin</span>
-    </div>
+            {/* 2. IZIN / SAKIT */}
+            <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
+              <button onClick={() => navigate('/izin')} className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white">
+                <Calendar className="w-7 h-7 sm:w-8 sm:h-8" />
+              </button>
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Izin</span>
+            </div>
 
-    {/* 3. VERIFIKASI AKUN */}
-    <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
-      <button onClick={() => navigate('/admin/verifikasi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-indigo-100 hover:bg-indigo-600 hover:text-white">
-        <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
-      </button>
-      <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Verifikasi</span>
-    </div>
+            {/* 3. VERIFIKASI AKUN */}
+            <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
+              <button onClick={() => navigate('/admin/verifikasi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-indigo-100 hover:bg-indigo-600 hover:text-white">
+                <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
+              </button>
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Verifikasi</span>
+            </div>
 
-    {/* 4. PERSETUJUAN PULANG (BADGE) */}
-    {/* w-[45%] memaksa 2 tombol di baris kedua pada HP */}
-    <div className="flex flex-col items-center w-[45%] lg:w-auto lg:flex-1">
-      <div className="relative">
-        <button onClick={() => navigate('/admin/persetujuan-pulang-cepat')} className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100 hover:bg-orange-600 hover:text-white">
-          <Clock className="w-7 h-7 sm:w-8 sm:h-8" />
-        </button>
-        {pendingPulangCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-6 h-6 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-white animate-bounce shadow-lg">
-            {pendingPulangCount}
-          </span>
-        )}
-      </div>
-      <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">ACC Pulang</span>
-    </div>
+            {/* 4. PERSETUJUAN PULANG (BADGE) */}
+            {/* w-[45%] memaksa 2 tombol di baris kedua pada HP */}
+            <div className="flex flex-col items-center w-[45%] lg:w-auto lg:flex-1">
+              <div className="relative">
+                <button onClick={() => navigate('/admin/persetujuan-pulang-cepat')} className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100 hover:bg-orange-600 hover:text-white">
+                  <Clock className="w-7 h-7 sm:w-8 sm:h-8" />
+                </button>
+                {pendingPulangCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-6 h-6 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-white animate-bounce shadow-lg">
+                    {pendingPulangCount}
+                  </span>
+                )}
+              </div>
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">ACC Pulang</span>
+            </div>
 
-    {/* 5. REKAPITULASI */}
-    <div className="flex flex-col items-center w-[45%] lg:w-auto lg:flex-1">
-      <button onClick={() => navigate('/admin/rekap-absen')} className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100 hover:bg-purple-600 hover:text-white">
-        <Users className="w-7 h-7 sm:w-8 sm:h-8" />
-      </button>
-      <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Rekap Absen</span>
-    </div>
+            {/* 5. REKAPITULASI */}
+            <div className="flex flex-col items-center w-[45%] lg:w-auto lg:flex-1">
+              <button onClick={() => navigate('/admin/rekap-absen')} className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100 hover:bg-purple-600 hover:text-white">
+                <Users className="w-7 h-7 sm:w-8 sm:h-8" />
+              </button>
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Rekap Absen</span>
+            </div>
 
-  </div>
-</section>
+          </div>
+        </section>
 
         {/* PERSONAL HISTORY LIST (Admin's Personal Data) */}
         <section className="space-y-6 pt-4">
