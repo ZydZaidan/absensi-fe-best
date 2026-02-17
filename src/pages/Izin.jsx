@@ -11,7 +11,7 @@ const Izin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    jenis_izin: '', // 'sakit', 'izin', 'dinas', 'cuti'
+    kategori: '', 
     tanggal_mulai: '',
     tanggal_selesai: '',
     keterangan: '',
@@ -105,9 +105,9 @@ const Izin = () => {
                     <button
                       key={type}
                       type="button"
-                      onClick={() => setFormData({ ...formData, jenis_izin: type.toLowerCase() })}
+                      onClick={() => setFormData({ ...formData, kategori: type.toLowerCase() })}
                       className={`py-4 rounded-2xl text-xs font-black transition-all border-2 ${
-                        formData.jenis_izin === type.toLowerCase() 
+                        formData.kategori === type.toLowerCase() 
                         ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-100 scale-105' 
                         : 'bg-slate-50 border-transparent text-slate-400 hover:bg-white hover:border-emerald-200'
                       }`}
