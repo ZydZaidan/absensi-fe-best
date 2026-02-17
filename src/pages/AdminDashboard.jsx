@@ -161,7 +161,7 @@ const AdminDashboard = () => {
             {/* 3. PULANG CEPAT (Dipindah ke urutan 3 agar sebaris di HP) */}
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pulang Cepat</p>
-              <p className="text-xl md:text-2xl font-black text-slate-300">0</p>
+              <p className="text-xl md:text-2xl font-black text-slate-300">{stats?.pulang_cepat || 0}</p>
             </div>
 
             {/* Divider Desktop Only */}
