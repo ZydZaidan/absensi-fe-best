@@ -185,7 +185,7 @@ const Dashboard = () => {
         </section>
 
 {/* MAIN BUTTONS (User Friendly: Lingkaran & Satu Baris) */}
-<section className="flex flex-row justify-around items-start gap-2 px-2 py-4 bg-white rounded-4xl shadow-sm border border-slate-50">
+<section className="flex flex-row justify-around items-start gap-2 px-2 py-4 ">
   
   {/* --- TOMBOL 1: DINAMIS (ABSEN) --- */}
   <div className="flex flex-col items-center flex-1 max-w-25">
