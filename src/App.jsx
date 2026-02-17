@@ -13,6 +13,8 @@ import Riwayat from './pages/Riwayat';
 import VerifikasiKaryawan from './pages/VerifikasiKaryawan';
 import RekapAbsensi from './pages/RekapAbsensi';
 import PersetujuanPulangCepat from './pages/PersetujuanPulangCepat';
+import PersetujuanIzin from './pages/PersetujuanIzin';
+
 
 
 
@@ -45,6 +47,7 @@ function App() {
         <Route path="/admin/verifikasi" element={<VerifikasiKaryawan />} />
         <Route path="/admin/rekap-absen" element={<RekapAbsensi />} />
         <Route path="/admin/persetujuan-pulang-cepat" element={<PersetujuanPulangCepat />} />
+        <Route path="/admin/persetujuan-izin" element={<PersetujuanIzin />} />
 
         {/* 2. PINDAHKAN INI KE PALING BAWAH (Wildcard Catch-all) */}
         <Route path="*" element={<Navigate to="/" />} />

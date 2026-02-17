@@ -186,19 +186,12 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        {/* ACTION BUTTONS (Mobile: 2 Baris 3-2 | Desktop: 1 Baris Melebar) */}
-        <section>
+       {/* ACTION BUTTONS (6 Tombol: Mobile 3-3 | Desktop 1 Baris Melebar) */}
+        <section className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100">
           
-          {/* 
-              - flex-wrap: agar bisa turun ke baris baru di HP
-              - lg:flex-nowrap: memaksa 1 baris di Desktop
-              - justify-center: agar simetris di HP
-              - lg:justify-between: agar melebar di Desktop
-          */}
           <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-y-10 gap-x-2 md:gap-x-6">
             
-            {/* 1. ABSEN (Dinamis) */}
-            {/* w-[30%] memaksa 3 tombol di baris pertama pada HP */}
+            {/* 1. ABSEN (Dinamis Pribadi Admin) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               {!todayData ? (
                 <button onClick={() => navigate('/absensi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100 hover:bg-blue-600 hover:text-white group">
@@ -218,7 +211,7 @@ const AdminDashboard = () => {
               </span>
             </div>
 
-            {/* 2. IZIN / SAKIT */}
+            {/* 2. IZIN / SAKIT (Pribadi) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <button onClick={() => navigate('/izin')} className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white">
                 <Calendar className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -226,7 +219,7 @@ const AdminDashboard = () => {
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Izin</span>
             </div>
 
-            {/* 3. VERIFIKASI AKUN */}
+            {/* 3. VERIFIKASI AKUN (Admin) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <button onClick={() => navigate('/admin/verifikasi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-indigo-100 hover:bg-indigo-600 hover:text-white">
                 <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -234,9 +227,8 @@ const AdminDashboard = () => {
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Verifikasi</span>
             </div>
 
-            {/* 4. PERSETUJUAN PULANG (BADGE) */}
-            {/* w-[45%] memaksa 2 tombol di baris kedua pada HP */}
-            <div className="flex flex-col items-center w-[45%] lg:w-auto lg:flex-1">
+            {/* 4. ACC PULANG CEPAT (Admin) */}
+            <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <div className="relative">
                 <button onClick={() => navigate('/admin/persetujuan-pulang-cepat')} className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100 hover:bg-orange-600 hover:text-white">
                   <Clock className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -250,14 +242,28 @@ const AdminDashboard = () => {
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">ACC Pulang</span>
             </div>
 
-            {/* 5. REKAPITULASI */}
-            <div className="flex flex-col items-center w-[45%] lg:w-auto lg:flex-1">
+            {/* 5. PERSETUJUAN IZIN & CUTI (Admin - Fitur Baru) */}
+            <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
+              <div className="relative">
+                <button 
+                  onClick={() => navigate('/admin/persetujuan-izin')} 
+                  className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white"
+                >
+                  <CalendarCheck className="w-7 h-7 sm:w-8 sm:h-8" />
+                </button>
+                {/* Nanti bisa ditambah badge jumlah izin pending di sini */}
+              </div>
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">ACC Izin</span>
+            </div>
+
+            {/* 6. REKAPITULASI (Admin) */}
+            <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <button onClick={() => navigate('/admin/rekap-absen')} className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100 hover:bg-purple-600 hover:text-white">
                 <Users className="w-7 h-7 sm:w-8 sm:h-8" />
               </button>
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Rekap Absen</span>
             </div>
-
+            
           </div>
         </section>
 
