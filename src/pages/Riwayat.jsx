@@ -100,7 +100,7 @@ const Riwayat = () => {
         <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-8 lg:gap-0">
             <div className="col-span-2 text-center lg:flex-1">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
-                <p className="text-xl md:text-3xl font-black text-blue-600">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
+                <p className="text-xl md:text-3xl font-black text-blue-600">{(stats?.hadir || 0)}</p>
             </div>
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
             <div className="col-span-2 text-center lg:flex-1 border-l lg:border-none border-slate-100">

@@ -140,7 +140,7 @@ const Dashboard = () => {
             {/* 1. HADIR - Mobile: 2 dari 6 kolom (1/3 baris) */}
             <div className="col-span-2 text-center lg:flex-1">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
-              <p className="text-xl md:text-2xl font-black text-blue-600">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
+              <p className="text-xl md:text-2xl font-black text-blue-600">{(stats?.hadir || 0)}</p>
             </div>
 
             {/* Divider Desktop Only */}
