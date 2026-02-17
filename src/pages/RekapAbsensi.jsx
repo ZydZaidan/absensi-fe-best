@@ -21,7 +21,6 @@ const RekapAbsensi = () => {
 
   const fixUrl = (url) => {
     if (!url) return null;
-    // Paksa HTTPS agar tidak diblokir Vercel (Mixed Content)
     return url.replace('http://', 'https://');
   };
 
@@ -45,9 +44,7 @@ const RekapAbsensi = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // DEBUG: Lihat di console apa isi data dari BE
         console.log("Data Rekap dari Server:", response.data.data);
-        
         setData(response.data.data || []);
       } catch (err) {
         if (err.response?.status === 401) { localStorage.clear(); navigate('/'); }
@@ -68,7 +65,7 @@ const RekapAbsensi = () => {
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* FILTER BOX */}
+        {/* FILTER BOX - UPDATE: Menambah 4 status kategori */}
         <section className="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Bulan</label>
@@ -79,12 +76,16 @@ const RekapAbsensi = () => {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Status</label>
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Status Kehadiran</label>
             <select className="w-full p-3 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none" value={filter.status} onChange={(e) => setFilter({...filter, status: e.target.value})}>
               <option value="">Semua Status</option>
               <option value="hadir">Hadir</option>
               <option value="telat">Terlambat</option>
-              <option value="izin">Izin / Sakit</option>
+              <option value="izin">Izin</option>
+              <option value="sakit">Sakit</option>
+              <option value="cuti">Cuti</option>
+              <option value="dinas">Dinas Luar</option>
+              <option value="alpha">Alpha</option>
             </select>
           </div>
           <div className="space-y-2">
@@ -136,14 +137,12 @@ const RekapAbsensi = () => {
                     </td>
                     <td className="px-8 py-5 text-center">
                         <div className="flex justify-center gap-2">
-                            {/* Tombol Foto Masuk */}
                             {row.foto_masuk_url ? (
                                 <button onClick={() => { setSelectedImage(fixUrl(row.foto_masuk_url)); setPreviewTitle("Bukti Foto Masuk"); }} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm">
                                     <Camera className="w-4 h-4" />
                                 </button>
                             ) : <div className="p-2.5 bg-slate-50 text-slate-100 rounded-xl"><ImageOff className="w-4 h-4" /></div>}
 
-                            {/* Tombol Foto Pulang */}
                             {row.foto_pulang_url ? (
                                 <button onClick={() => { setSelectedImage(fixUrl(row.foto_pulang_url)); setPreviewTitle("Bukti Foto Pulang"); }} className="p-2.5 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all shadow-sm">
                                     <Camera className="w-4 h-4" />
@@ -151,8 +150,24 @@ const RekapAbsensi = () => {
                             ) : <div className={`p-2.5 rounded-xl ${row.jam_pulang ? 'bg-slate-50 text-slate-100' : 'bg-transparent'}`}>{row.jam_pulang && <ImageOff className="w-4 h-4" />}</div>}
                         </div>
                     </td>
-                    <td className="px-8 py-5 text-center uppercase tracking-widest font-black text-[10px]">
-                      <span className={row.status === 'hadir' ? 'text-emerald-500' : 'text-rose-500'}>{row.status}</span>
+                    {/* KOLOM STATUS - UPDATE: Double Status & All Categories */}
+                    <td className="px-8 py-5 text-center">
+                      <div className="flex flex-wrap justify-center gap-1.5">
+                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                            row.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
+                            row.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
+                            row.status === 'sakit' ? 'bg-red-100 text-red-700' : 
+                            row.status === 'cuti' ? 'bg-blue-100 text-blue-700' : 
+                            row.status === 'dinas' ? 'bg-purple-100 text-purple-700' : 
+                            row.status === 'alpha' ? 'bg-slate-200 text-slate-500' : 
+                            'bg-amber-100 text-amber-700' // Default Izin
+                        }`}>
+                            {row.status}
+                        </span>
+                        {row.status_pulang_cepat === 'disetujui' && (
+                            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">PC</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase italic">
                         <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Pusat'}</div>
