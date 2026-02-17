@@ -184,96 +184,126 @@ const Dashboard = () => {
           </div>
         </section>
 
-{/* MAIN BUTTONS (User Friendly: Lingkaran & Satu Baris) */}
-<section className="flex flex-row justify-around items-start gap-2 px-2 py-4 ">
-  
-  {/* --- TOMBOL 1: DINAMIS (ABSEN) --- */}
-  <div className="flex flex-col items-center flex-1 max-w-25">
-    {!todayData ? (
-      // BELUM ABSEN (BIRU)
-      <button 
-        onClick={() => navigate('/absensi')}
-        className="w-14 h-14 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100"
-      >
-        <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
-      </button>
-    ) : todayData.jam_pulang ? (
-      // SELESAI (ABU-ABU)
-      <div className="w-14 h-14 sm:w-20 sm:h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center border-2 border-slate-100">
-        <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8" />
-      </div>
-    ) : todayData.status_pulang_cepat === 'pending' ? (
-      // PENDING (KUNING)
-      <button 
-        disabled
-        className="w-14 h-14 sm:w-20 sm:h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border-2 border-amber-100 animate-pulse cursor-wait"
-      >
-        <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
-      </button>
-    ) : (
-      // PULANG (ORANYE)
-      <button 
-        onClick={() => navigate('/absensi-pulang')} 
-        className="w-14 h-14 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100"
-      >
-        <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
-      </button>
-    )}
-    <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
-      {todayData ? (todayData.jam_pulang ? 'Selesai' : (todayData.status_pulang_cepat === 'pending' ? 'Tunggu' : 'Pulang')) : 'Absen'}
-    </span>
-  </div>
+        {/* MAIN BUTTONS (User Friendly: Lingkaran & Satu Baris) */}
+        <section className="flex flex-row justify-around items-start gap-2 px-2 py-4 ">
+          
+          {/* --- TOMBOL 1: DINAMIS (ABSEN) --- */}
+          <div className="flex flex-col items-center flex-1 max-w-25">
+            {!todayData ? (
+              // BELUM ABSEN (BIRU)
+              <button 
+                onClick={() => navigate('/absensi')}
+                className="w-14 h-14 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100"
+              >
+                <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            ) : todayData.jam_pulang ? (
+              // SELESAI (ABU-ABU)
+              <div className="w-14 h-14 sm:w-20 sm:h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center border-2 border-slate-100">
+                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
+            ) : todayData.status_pulang_cepat === 'pending' ? (
+              // PENDING (KUNING)
+              <button 
+                disabled
+                className="w-14 h-14 sm:w-20 sm:h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border-2 border-amber-100 animate-pulse cursor-wait"
+              >
+                <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            ) : (
+              // PULANG (ORANYE)
+              <button 
+                onClick={() => navigate('/absensi-pulang')} 
+                className="w-14 h-14 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100"
+              >
+                <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+            <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
+              {todayData ? (todayData.jam_pulang ? 'Selesai' : (todayData.status_pulang_cepat === 'pending' ? 'Tunggu' : 'Pulang')) : 'Absen'}
+            </span>
+          </div>
 
-  {/* --- TOMBOL 2: IZIN / SAKIT (HIJAU) --- */}
-  <div className="flex flex-col items-center flex-1 max-w-25">
-    <button 
-      onClick={() => navigate('/izin')}
-      className="w-14 h-14 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100"
-    >
-      <Calendar className="w-6 h-6 sm:w-8 sm:h-8" />
-    </button>
-    <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
-      Izin/Sakit
-    </span>
-  </div>
+          {/* --- TOMBOL 2: IZIN / SAKIT (HIJAU) --- */}
+          <div className="flex flex-col items-center flex-1 max-w-25">
+            <button 
+              onClick={() => navigate('/izin')}
+              className="w-14 h-14 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100"
+            >
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8" />
+            </button>
+            <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
+              Izin/Sakit
+            </span>
+          </div>
 
-  {/* --- TOMBOL 3: RIWAYAT (UNGU) --- */}
-  <div className="flex flex-col items-center flex-1 max-w-25">
-    <button 
-      onClick={() => navigate('/riwayat')}
-      className="w-14 h-14 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100"
-    >
-      <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
-    </button>
-    <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
-      Riwayat
-    </span>
-  </div>
+          {/* --- TOMBOL 3: RIWAYAT (UNGU) --- */}
+          <div className="flex flex-col items-center flex-1 max-w-25">
+            <button 
+              onClick={() => navigate('/riwayat')}
+              className="w-14 h-14 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100"
+            >
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
+            </button>
+            <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
+              Riwayat
+            </span>
+          </div>
 
-</section>
+        </section>
 
-        {/* HISTORY LIST */}
+        {/* HISTORY LIST - UPDATE LOGIC */}
         <section className="space-y-6 pt-4">
           <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest px-2">History Absensi</h3>
           <div className="space-y-4">
             {history.length > 0 ? history.map((item, i) => (
-              <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow group">
                 <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
+                  {/* Lingkaran Tanggal Dinamis */}
+                  <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${
+                    item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
+                    (item.status === 'telat' || item.status === 'sakit') ? 'bg-rose-50 border-rose-100 text-rose-600' : 
+                    'bg-blue-50 border-blue-100 text-blue-600'
+                  }`}>
                     <span className="text-lg font-black leading-none">{new Date(item.tanggal_absen).getDate()}</span>
                     <span className="text-[8px] font-bold uppercase">{new Date(item.tanggal_absen).toLocaleString('id-ID', {month: 'short'})}</span>
                   </div>
+
                   <div>
-                    <p className="text-sm font-black text-slate-800">Absen {item.jam_pulang ? 'Selesai' : 'Masuk'}</p>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-                      {item.status === 'hadir' ? 'TEPAT WAKTU' : 'TERLAMBAT'}
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      {/* Badge Status Utama */}
+                      <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                        item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
+                        item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
+                        'bg-amber-100 text-amber-700'
+                      }`}>
+                        {item.status}
+                      </span>
+
+                      {/* Badge Double Status: Pulang Cepat */}
+                      {item.status_pulang_cepat === 'disetujui' && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">
+                          PC
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Judul Aktivitas Dinamis */}
+                    <p className="text-sm font-black text-slate-800 uppercase italic tracking-tighter">
+                      {['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) 
+                        ? `PENGADAAN ${item.status}` 
+                        : (item.jam_pulang ? 'Absensi Selesai' : 'Absen Masuk')}
                     </p>
                   </div>
                 </div>
+
                 <div className="text-right">
-                  <p className="text-lg font-black text-slate-800">
-                    {item.jam_masuk?.slice(0, 5) || '--:--'}
-                  </p>
+                  {/* Jam Masuk (Disembunyikan jika statusnya Cuti/Izin) */}
+                  {!['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) && (
+                    <p className="text-lg font-black text-slate-800">
+                      {item.jam_masuk?.slice(0, 5) || '--:--'}
+                    </p>
+                  )}
                 </div>
               </div>
             )) : (

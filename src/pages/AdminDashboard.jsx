@@ -267,7 +267,7 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        {/* PERSONAL HISTORY LIST (Admin's Personal Data) */}
+        {/* PERSONAL HISTORY LIST - UPDATE LOGIC */}
         <section className="space-y-6 pt-4">
           <div className="flex justify-between items-end px-2">
             <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest">Riwayat Absensi Saya</h3>
@@ -278,21 +278,46 @@ const AdminDashboard = () => {
             {history.length > 0 ? history.slice(0, 3).map((item, i) => (
               <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all group">
                 <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
+                  {/* Lingkaran Tanggal Dinamis */}
+                  <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${
+                    item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
+                    (item.status === 'telat' || item.status === 'sakit') ? 'bg-rose-50 border-rose-100 text-rose-600' : 
+                    'bg-blue-50 border-blue-100 text-blue-600'
+                  }`}>
                     <span className="text-lg font-black leading-none">{new Date(item.tanggal_absen).getDate()}</span>
                     <span className="text-[8px] font-bold uppercase">{new Date(item.tanggal_absen).toLocaleString('id-ID', { month: 'short' })}</span>
                   </div>
+
                   <div>
-                    <p className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors uppercase italic tracking-tighter">Absen {item.jam_pulang ? 'Selesai' : 'Masuk'}</p>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{item.status === 'hadir' ? 'TEPAT WAKTU' : 'TERLAMBAT'}</p>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                        item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
+                        item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
+                        'bg-amber-100 text-amber-700'
+                      }`}>
+                        {item.status}
+                      </span>
+                      {item.status_pulang_cepat === 'disetujui' && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">
+                          PC
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-black text-slate-800 uppercase italic tracking-tighter">
+                        {['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) 
+                            ? `PENGADAAN ${item.status}` 
+                            : (item.jam_pulang ? 'Absen Selesai' : 'Absen Masuk')}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-black text-slate-800">{item.jam_masuk?.slice(0,5) || '--:--'} WIB</p>
+                  {!['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) && (
+                    <p className="text-sm font-black text-slate-800">{item.jam_masuk?.slice(0,5) || '--:--'} WIB</p>
+                  )}
                 </div>
               </div>
             )) : (
-              <p className="text-center text-slate-300 font-bold uppercase text-[10px] py-10">Belum ada riwayat absen bulan ini.</p>
+              <p className="text-center text-slate-300 font-bold uppercase text-[10px] py-10 italic">Belum ada riwayat absen bulan ini.</p>
             )}
           </div>
         </section>
