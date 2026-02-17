@@ -10,13 +10,13 @@ const Riwayat = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0, pulang_cepat: 0 });
+  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0 });
   
   // State untuk Filter
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
 
-  // 1. Ambil Data History
+  // 1. Gunakan useCallback agar fungsi tidak dibuat ulang setiap render (Menghilangkan Warning Dependency)
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
@@ -25,8 +25,9 @@ const Riwayat = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      // Pastikan struktur data sesuai dengan respon Laravel
       setHistory(response.data.data || []);
-      setStats(response.data.stats || { hadir: 0, telat: 0, izin: 0, pulang_cepat: 0 });
+      setStats(response.data.stats || { hadir: 0, telat: 0, izin: 0 });
     } catch (err) {
       console.error("Gagal mengambil riwayat:", err);
       if (err.response?.status === 401) {
@@ -36,8 +37,9 @@ const Riwayat = () => {
     } finally {
       setLoading(false);
     }
-  }, [month, year, navigate]);
+  }, [month, year, navigate]); // Fungsi akan update jika month/year berubah
 
+  // 2. useEffect memanggil fetchHistory
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
@@ -48,8 +50,8 @@ const Riwayat = () => {
       {/* HEADER */}
       <header className="bg-white sticky top-0 z-50 p-6 md:px-12 flex items-center justify-between border-b border-slate-100 shadow-sm">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-all group">
-            <ArrowLeft className="w-5 h-5 text-slate-600 group-hover:text-blue-600" />
+          <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-all">
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800">Riwayat Kehadiran</h1>
         </div>
@@ -69,6 +71,7 @@ const Riwayat = () => {
             </div>
             
             <div className="flex flex-wrap md:flex-nowrap gap-3 w-full md:w-auto">
+                {/* Dropdown Bulan */}
                 <select 
                     value={month} 
                     onChange={(e) => setMonth(parseInt(e.target.value))}
@@ -79,6 +82,7 @@ const Riwayat = () => {
                     ))}
                 </select>
 
+                {/* Dropdown Tahun (UPDATE: Agar setYear terpakai) */}
                 <select 
                     value={year} 
                     onChange={(e) => setYear(parseInt(e.target.value))}
@@ -95,33 +99,54 @@ const Riwayat = () => {
             </div>
         </section>
 
-        {/* SUMMARY CARDS (Responsive: Mobile 3-2) */}
+        {/* SUMMARY CARDS (Responsive: Mobile 3-2, Desktop 1 Baris) */}
         <section className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-100">
         <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-8 lg:gap-0">
+            
+            {/* 1. HADIR - (Warna Biru Utama) */}
             <div className="col-span-2 text-center lg:flex-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
-                <p className="text-xl md:text-3xl font-black text-blue-600">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
+            <p className="text-xl md:text-3xl font-black text-blue-600">
+                {(stats?.hadir || 0) + (stats?.telat || 0)}
+            </p>
             </div>
+
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
-            <div className="col-span-2 text-center lg:flex-1 border-l lg:border-none border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
-                <p className="text-xl md:text-3xl font-black text-amber-500">{stats?.izin || 0}</p>
+
+            {/* 2. IZIN - (Warna Kuning/Amber) */}
+            <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
+            <p className="text-xl md:text-3xl font-black text-amber-500">{stats?.izin || 0}</p>
             </div>
+
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
-            <div className="col-span-2 text-center lg:flex-1 border-l lg:border-none border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">P. Cepat</p>
-                <p className="text-xl md:text-3xl font-black text-orange-500">{stats?.pulang_cepat || 0}</p>
+
+            {/* 3. PULANG CEPAT - (Warna Oranye) */}
+            <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">P. Cepat</p>
+            <p className="text-xl md:text-3xl font-black text-orange-500">
+                {stats?.pulang_cepat || 0}
+            </p>
             </div>
+
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/*  Baris Kedua di HP */}
+            
+            {/* 4. TERLAMBAT - (Warna Merah) */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-6 lg:pt-0 border-slate-100">
-                <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Telat</p>
-                <p className="text-xl md:text-3xl font-black text-rose-500">{stats?.telat || 0}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-rose-400">Telat</p>
+            <p className="text-xl md:text-3xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
+
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 5. ALPHA - (Warna Abu-abu) */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-6 lg:pt-0 border-l border-slate-100 lg:border-none">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-                <p className="text-xl md:text-3xl font-black text-slate-300">0</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
+            <p className="text-xl md:text-3xl font-black text-slate-300">0</p>
             </div>
+
         </div>
         </section>
 
@@ -139,59 +164,30 @@ const Riwayat = () => {
                     {history.map((item, i) => (
                         <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all group">
                             <div className="flex items-center gap-6">
-                                {/* Warna Lingkaran Dinamis Berdasarkan Status */}
-                                <div className={`w-16 h-16 rounded-full border-2 flex flex-col items-center justify-center shrink-0 ${
-                                    item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
-                                    item.status === 'telat' ? 'bg-rose-50 border-rose-100 text-rose-600' : 
-                                    item.status === 'cuti' ? 'bg-blue-50 border-blue-100 text-blue-600' : 
-                                    item.status === 'dinas' ? 'bg-purple-50 border-purple-100 text-purple-600' : 
-                                    'bg-amber-50 border-amber-100 text-amber-600'
-                                }`}>
+                                <div className={`w-16 h-16 rounded-full border-2 flex flex-col items-center justify-center shrink-0 ${item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
                                     <span className="text-xl font-black leading-none">{new Date(item.tanggal_absen).getDate()}</span>
                                     <span className="text-[10px] font-bold uppercase">{new Date(item.tanggal_absen).toLocaleString('id-ID', { month: 'short' })}</span>
                                 </div>
                                 
                                 <div>
-                                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                                        {/* Status Utama */}
-                                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
-                                            item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
-                                            item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
-                                            item.status === 'sakit' ? 'bg-red-100 text-red-700' : 
-                                            item.status === 'cuti' ? 'bg-blue-100 text-blue-700' : 
-                                            item.status === 'dinas' ? 'bg-purple-100 text-purple-700' : 
-                                            'bg-amber-100 text-amber-700'
-                                        }`}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <p className="text-lg font-black text-slate-800 tracking-tight italic">
+                                            {item.jam_pulang ? 'Absensi Lengkap' : 'Hanya Absen Masuk'}
+                                        </p>
+                                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase ${item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                                             {item.status}
                                         </span>
-
-                                        {/* Status Double: Pulang Cepat */}
-                                        {item.status_pulang_cepat === 'disetujui' && (
-                                            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase bg-orange-100 text-orange-700 border border-orange-200">
-                                                Pulang Cepat
-                                            </span>
-                                        )}
                                     </div>
-                                    <div className="mt-2">
-                                        <p className="text-lg font-black text-slate-800 tracking-tight leading-tight">
-                                            {['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) 
-                                                ? `Pengajuan ${item.status.toUpperCase()}` 
-                                                : (item.jam_pulang ? 'Absensi Lengkap' : 'Hanya Absen Masuk')}
-                                        </p>
-                                        <div className="flex flex-wrap gap-4 mt-2">
-                                            {/* Jam hanya muncul jika bukan status Izin/Cuti/Dinas */}
-                                            {!['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) && (
-                                                <div className="flex items-center gap-1.5 text-slate-400">
-                                                    <Clock className="w-3 h-3" />
-                                                    <span className="text-xs font-bold font-mono">
-                                                        {item.jam_masuk?.slice(0,5)} - {item.jam_pulang ? item.jam_pulang.slice(0,5) : '--:--'}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            <div className="flex items-center gap-1.5 text-slate-400">
-                                                <MapPin className="w-3 h-3" />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">Koordinat Tercatat</span>
-                                            </div>
+                                    <div className="flex flex-wrap gap-4 mt-2">
+                                        <div className="flex items-center gap-1.5 text-slate-400">
+                                            <Clock className="w-3 h-3" />
+                                            <span className="text-xs font-bold">
+                                              {item.jam_masuk?.slice(0,5)} - {item.jam_pulang ? item.jam_pulang.slice(0,5) : '--:--'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-slate-400">
+                                            <MapPin className="w-3 h-3" />
+                                            <span className="text-xs font-bold uppercase">Koordinat Tercatat</span>
                                         </div>
                                     </div>
                                 </div>
@@ -201,7 +197,7 @@ const Riwayat = () => {
                 </div>
             ) : (
                 <div className="bg-white p-20 rounded-[3rem] text-center border border-dashed border-slate-200">
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Belum ada aktivitas tercatat pada periode ini.</p>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Belum ada aktivitas pada bulan ini.</p>
                 </div>
             )}
         </section>
