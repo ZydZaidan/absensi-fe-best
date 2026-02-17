@@ -184,70 +184,73 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* MAIN BUTTONS (LOGIKA PERBAIKAN DI SINI) */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {!todayData ? (
-            // 1. BELUM ABSEN MASUK
-            <button 
-              onClick={() => navigate('/absensi')}
-              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-blue-500 transition-all group active:scale-95"
-            >
-              <div className="bg-blue-50 p-5 rounded-2xl mb-5 group-hover:bg-blue-600 transition-colors">
-                <Camera className="w-7 h-7 text-blue-600 group-hover:text-white" />
-              </div>
-              <span className="text-xs font-black text-blue-900 uppercase tracking-widest">Absen Masuk</span>
-            </button>
-          ) : todayData.jam_pulang ? (
-            // 2. SUDAH PULANG (TOMBOL MATI)
-            <button 
-              disabled
-              className="flex flex-col items-center justify-center bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 opacity-60 cursor-not-allowed"
-            >
-              <div className="bg-slate-200 p-5 rounded-2xl mb-5">
-                <CheckCircle className="w-7 h-7 text-slate-400" />
-              </div>
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Absensi Selesai</span>
-            </button>
-          ) : todayData.status_pulang_cepat === 'pending' ? (
-            // 3. SEDANG MENUNGGU ACC ADMIN (TOMBOL DISABLE)
-            <button 
-              disabled
-              className="flex flex-col items-center justify-center bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100 opacity-80 cursor-wait"
-            >
-              <div className="bg-amber-100 p-5 rounded-2xl mb-5 animate-pulse">
-                <Clock className="w-7 h-7 text-amber-600" />
-              </div>
-              <span className="text-[10px] font-black text-amber-700 uppercase tracking-tighter text-center">
-                Menunggu Persetujuan <br/> Pulang Cepat...
-              </span>
-            </button>
-          ) : (
-            // 4. SUDAH MASUK & BOLEH KLIK PULANG (Termasuk jika ditolak admin sebelumnya)
-            <button 
-              onClick={() => navigate('/absensi-pulang')} 
-              className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-orange-100 hover:border-orange-500 transition-all group active:scale-95"
-            >
-              <div className="bg-orange-50 p-5 rounded-2xl mb-5 group-hover:bg-orange-600 transition-colors">
-                <Camera className="w-7 h-7 text-orange-600 group-hover:text-white" />
-              </div>
-              <span className="text-xs font-black text-orange-900 uppercase tracking-widest">Absen Pulang</span>
-            </button>
-          )}
+{/* MAIN BUTTONS (User Friendly: Lingkaran & Satu Baris) */}
+<section className="flex flex-row justify-around items-start gap-2 px-2 py-4 bg-white rounded-4xl shadow-sm border border-slate-50">
+  
+  {/* --- TOMBOL 1: DINAMIS (ABSEN) --- */}
+  <div className="flex flex-col items-center flex-1 max-w-25">
+    {!todayData ? (
+      // BELUM ABSEN (BIRU)
+      <button 
+        onClick={() => navigate('/absensi')}
+        className="w-14 h-14 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100"
+      >
+        <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
+      </button>
+    ) : todayData.jam_pulang ? (
+      // SELESAI (ABU-ABU)
+      <div className="w-14 h-14 sm:w-20 sm:h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center border-2 border-slate-100">
+        <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8" />
+      </div>
+    ) : todayData.status_pulang_cepat === 'pending' ? (
+      // PENDING (KUNING)
+      <button 
+        disabled
+        className="w-14 h-14 sm:w-20 sm:h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border-2 border-amber-100 animate-pulse cursor-wait"
+      >
+        <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
+      </button>
+    ) : (
+      // PULANG (ORANYE)
+      <button 
+        onClick={() => navigate('/absensi-pulang')} 
+        className="w-14 h-14 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100"
+      >
+        <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
+      </button>
+    )}
+    <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
+      {todayData ? (todayData.jam_pulang ? 'Selesai' : (todayData.status_pulang_cepat === 'pending' ? 'Tunggu' : 'Pulang')) : 'Absen'}
+    </span>
+  </div>
 
-          <button onClick={() => navigate('/izin')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-emerald-500 transition-all group active:scale-95">
-            <div className="bg-emerald-50 p-5 rounded-2xl mb-5 group-hover:bg-emerald-600 transition-colors">
-              <Calendar className="w-7 h-7 text-emerald-600 group-hover:text-white" />
-            </div>
-            <span className="text-xs font-black text-emerald-900 uppercase tracking-widest">Izin / Sakit</span>
-          </button>
+  {/* --- TOMBOL 2: IZIN / SAKIT (HIJAU) --- */}
+  <div className="flex flex-col items-center flex-1 max-w-25">
+    <button 
+      onClick={() => navigate('/izin')}
+      className="w-14 h-14 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100"
+    >
+      <Calendar className="w-6 h-6 sm:w-8 sm:h-8" />
+    </button>
+    <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
+      Izin/Sakit
+    </span>
+  </div>
 
-          <button onClick={() => navigate('/riwayat')} className="flex flex-col items-center justify-center bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-50 hover:border-purple-500 transition-all group active:scale-95">
-            <div className="bg-purple-50 p-5 rounded-2xl mb-5 group-hover:bg-purple-600 transition-colors">
-              <Clock className="w-7 h-7 text-purple-600 group-hover:text-white" />
-            </div>
-            <span className="text-xs font-black text-purple-900 uppercase tracking-widest">Riwayat</span>
-          </button>
-        </section>
+  {/* --- TOMBOL 3: RIWAYAT (UNGU) --- */}
+  <div className="flex flex-col items-center flex-1 max-w-25">
+    <button 
+      onClick={() => navigate('/riwayat')}
+      className="w-14 h-14 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100"
+    >
+      <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
+    </button>
+    <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-tighter text-center leading-tight">
+      Riwayat
+    </span>
+  </div>
+
+</section>
 
         {/* HISTORY LIST */}
         <section className="space-y-6 pt-4">
