@@ -88,12 +88,15 @@ const AdminDashboard = () => {
       <main className="max-w-6xl mx-auto p-6 space-y-8">
         
         {/* HERO CARD */}
-        <section className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
+        <section className="bg-linear-to-br from-slate-800 to-slate-900 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
           <div className="flex flex-row justify-between items-center gap-6">
             <div>
+              <div className='bg-blue-600 w-fit px-3 py-1 rounded-full mb-3 shadow-lg shadow-blue-900/20 border border-blue-400/20'>
+                <p className='text-[8px] font-black uppercase tracking-[0.2em]'>Administrator Mode</p>
+              </div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-1">Selamat Datang</p>
               <h2 className="md:text-4xl text-2xl font-black flex items-center gap-2 italic">
-                {adminData?.name || 'Karyawan'} 
+                {adminData?.name || 'Admin'} 
               </h2>
               <p className="text-xs opacity-70 mt-1 font-medium">{adminData?.jabatan || 'Staff'} • PT BEST</p>
             </div>
