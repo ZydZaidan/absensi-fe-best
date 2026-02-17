@@ -158,6 +158,11 @@ const Dashboard = () => {
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
               <p className="text-2xl font-black text-slate-300">0</p>
             </div>
+            <div className="w-px h-10 bg-slate-100"></div>
+            <div className="text-center flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pulang Cepat</p>
+              <p className="text-2xl font-black text-slate-300">0</p>
+            </div>
           </div>
         </section>
 
