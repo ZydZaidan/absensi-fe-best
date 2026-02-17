@@ -99,20 +99,55 @@ const Riwayat = () => {
             </div>
         </section>
 
-        {/* SUMMARY CARDS */}
-        <section className="grid grid-cols-3 gap-4">
-            <div className="bg-blue-600 p-6 rounded-4xl text-white shadow-xl shadow-blue-100">
-                <p className="text-[10px] font-bold uppercase opacity-60 mb-1">Hadir</p>
-                <p className="text-3xl font-black">{stats?.hadir || 0 + stats?.telat || 0}</p>
+        {/* SUMMARY CARDS (Responsive: Mobile 3-2, Desktop 1 Baris) */}
+        <section className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-100">
+        <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-8 lg:gap-0">
+            
+            {/* 1. HADIR - (Warna Biru Utama) */}
+            <div className="col-span-2 text-center lg:flex-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
+            <p className="text-xl md:text-3xl font-black text-blue-600">
+                {(stats?.hadir || 0) + (stats?.telat || 0)}
+            </p>
             </div>
-            <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Telat</p>
-                <p className="text-3xl font-black text-rose-500">{stats.telat}</p>
+
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 2. IZIN - (Warna Kuning/Amber) */}
+            <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
+            <p className="text-xl md:text-3xl font-black text-amber-500">{stats?.izin || 0}</p>
             </div>
-            <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Izin</p>
-                <p className="text-3xl font-black text-amber-500">{stats.izin}</p>
+
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 3. PULANG CEPAT - (Warna Oranye) */}
+            <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">P. Cepat</p>
+            <p className="text-xl md:text-3xl font-black text-orange-500">
+                {stats?.pulang_cepat || 0}
+            </p>
             </div>
+
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/*  Baris Kedua di HP */}
+            
+            {/* 4. TERLAMBAT - (Warna Merah) */}
+            <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-6 lg:pt-0 border-slate-100">
+            <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-rose-400">Telat</p>
+            <p className="text-xl md:text-3xl font-black text-rose-500">{stats?.telat || 0}</p>
+            </div>
+
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 5. ALPHA - (Warna Abu-abu) */}
+            <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-6 lg:pt-0 border-l border-slate-100 lg:border-none">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
+            <p className="text-xl md:text-3xl font-black text-slate-300">0</p>
+            </div>
+
+        </div>
         </section>
 
         {/* TIMELINE LIST */}
