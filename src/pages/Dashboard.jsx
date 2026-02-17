@@ -33,9 +33,6 @@ const Dashboard = () => {
           axios.get(`${import.meta.env.VITE_API_URL}/riwayat-absensi`, config)
         ]);
 
-        // DEBUGGING: Aktifkan ini jika tombol masih belum ter-disable
-        // console.log("Status Absen Hari Ini:", resStatus.data.data);
-
         setTodayData(resStatus.data.data); 
         setHistory(resHistory.data.data || []);   
         setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0 });

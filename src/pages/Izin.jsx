@@ -33,7 +33,7 @@ const Izin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.jenis_izin) return alert("Pilih kategori pengajuan!");
+    if (!formData.kategori) return alert("Pilih kategori pengajuan!");
     
     // Validasi Logika Tanggal
     if (new Date(formData.tanggal_selesai) < new Date(formData.tanggal_mulai)) {
@@ -44,11 +44,13 @@ const Izin = () => {
     try {
       const token = localStorage.getItem('token');
       const data = new FormData();
-      data.append('jenis_izin', formData.jenis_izin);
+      data.append('kategori', formData.kategori);
       data.append('tanggal_mulai', formData.tanggal_mulai);
       data.append('tanggal_selesai', formData.tanggal_selesai);
       data.append('keterangan', formData.keterangan);
-      if (formData.dokumen) data.append('dokumen', formData.dokumen);
+      if (formData.dokumen) {
+        data.append('dokumen', formData.dokumen);
+      }
 
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/pengajuan-izin`, data, {
         headers: { 
@@ -58,12 +60,12 @@ const Izin = () => {
       });
 
       if (response.data.success) {
-          alert("Pengajuan " + formData.jenis_izin.toUpperCase() + " berhasil dikirim!");
+          alert("Pengajuan Berhasil Terkirim!");
           navigate('/dashboard');
       }
     } catch (err) {
       console.error(err);
-      alert("Gagal mengirim: " + (err.response?.data?.message || "Terjadi kesalahan server"));
+      alert("Gagal: " + (err.response?.data?.message || "Cek kembali data Anda"));
     } finally {
       setLoading(false);
     }

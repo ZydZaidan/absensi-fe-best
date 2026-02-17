@@ -31,23 +31,29 @@ const PersetujuanIzin = () => {
     }
   };
 
-  const handleAction = async (id, status) => {
-    const confirmMsg = status === 'approved' ? 'Setujui izin ini?' : 'Tolak izin ini?';
-    if (!window.confirm(confirmMsg)) return;
+// Ganti fungsi handleAction di PersetujuanIzin.jsx menjadi ini:
+
+const handleAction = async (id, status) => {
+    // Sesuaikan status dengan kemauan BE (disetujui/ditolak)
+    const finalStatus = status === 'approved' ? 'disetujui' : 'ditolak';
+    
+    if (!window.confirm(`Yakin ingin ${finalStatus} pengajuan ini?`)) return;
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-izin/${id}`, 
-        { status: status },
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-izin/${id}`, 
+        { status: finalStatus }, // Kirim "disetujui" atau "ditolak"
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      alert(`Berhasil di-${status}`);
-      setRequests(requests.filter(r => r.id !== id));
+      if (response.data.success) {
+          alert(`Pengajuan telah ${finalStatus}`);
+          setRequests(requests.filter(r => r.id !== id));
+      }
     } catch {
-      alert("Gagal memproses data");
+      alert("Gagal memproses persetujuan.");
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-12">

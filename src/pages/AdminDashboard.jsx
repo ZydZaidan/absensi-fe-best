@@ -27,7 +27,6 @@ const AdminDashboard = () => {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        // Ambil 3 data penting secara paralel (Lebih Cepat)
         const [resStatus, resHistory, resPending] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/attendance/check-status`, config),
           axios.get(`${import.meta.env.VITE_API_URL}/riwayat-absensi`, config),
