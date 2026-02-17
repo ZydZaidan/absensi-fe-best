@@ -87,64 +87,76 @@ const AdminDashboard = () => {
 
       <main className="max-w-6xl mx-auto p-6 space-y-8">
         
-        {/* HERO CARD (Admin Info & Live Clock) */}
-        <section className="bg-linear-to-br from-slate-800 to-slate-900 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
+        {/* HERO CARD */}
+        <section className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
           <div className="flex flex-row justify-between items-center gap-6">
             <div>
-              <div className="bg-blue-600 w-fit px-3 py-1 rounded-full mb-3 shadow-lg shadow-blue-900/20 border border-blue-400/20">
-                <p className="text-[8px] font-black uppercase tracking-[0.2em]">Administrator Mode</p>
-              </div>
-              <h2 className="text-3xl font-black italic tracking-tight leading-tight">
-                Halo, {adminData?.name || 'Admin'} <span className="not-italic">🛡️</span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-1">Selamat Datang</p>
+              <h2 className="md:text-4xl text-2xl font-black flex items-center gap-2 italic">
+                {adminData?.name || 'Karyawan'} 
               </h2>
-              <p className="text-xs opacity-60 mt-1 font-medium italic uppercase tracking-wider">
-                {adminData?.jabatan || 'Head'} • Kendali Pusat
-              </p>
+              <p className="text-xs opacity-70 mt-1 font-medium">{adminData?.jabatan || 'Staff'} • PT BEST</p>
             </div>
 
-            <div className="text-right border-l border-white/10 pl-6 hidden sm:block">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+            <div className="text-right border-l border-white/20 pl-4">
+              <h1 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">
                 {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
               </h1>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-60 mt-2">
-                {currentTime.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mt-2">
+                {currentTime.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric'})}
               </p>
             </div>
           </div>
 
-          {/* Admin's Personal Absence Status */}
-          <div className="mt-10 bg-white/5 backdrop-blur-md border border-white/10 rounded-4xl p-8 shadow-inner">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${todayData ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
-                <span className="text-lg font-black italic tracking-wide">
-                    {todayData ? (todayData.jam_pulang ? 'Absensi Selesai' : 'Status: Sudah Masuk') : 'Status: Belum Absen'}
-                </span>
+          <div className="mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl p-8">
+            <div className="flex items-center gap-3 mb-6">
+              {/* Logika Status Visual */}
+              <div className={`w-3 h-3 rounded-full animate-pulse ${todayData ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
+              <span className="text-xl font-black italic tracking-wide">
+                {todayData ? (todayData.jam_pulang ? 'Absensi Selesai' : 'Sudah Masuk') : 'Belum Absen'}
+              </span>
+            </div>
+
+            <div className="h-px bg-white/10 w-full mb-6"></div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase font-bold opacity-60">Jam Masuk</p>
+                <p className="text-2xl font-black tracking-tight">
+                  {todayData?.jam_masuk ? todayData.jam_masuk.slice(0, 5) : '-- : --'}
+                </p>      
               </div>
-              <div className="bg-white/10 px-3 py-1.5 rounded-xl font-black text-xs">
-                {todayData?.jam_masuk?.slice(0,5) || '--:--'}
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase font-bold opacity-60">Jam Pulang</p>
+                <p className="text-2xl font-black tracking-tight opacity-30">
+                  {todayData?.jam_pulang ? todayData.jam_pulang.slice(0,5) : '-- : --'}
+                </p>
               </div>
             </div>
-            
-            <div className="h-px bg-white/5 w-full mb-6"></div>
+          </div>
+        </section>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center md:text-left">
-                <p className="text-[10px] uppercase font-bold opacity-40 mb-1">Hadir</p>
-                <p className="text-2xl font-black text-white">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
-              </div>
-              <div className="text-center md:text-left border-l border-white/5 pl-6">
-                <p className="text-[10px] uppercase font-bold opacity-40 mb-1">Izin</p>
-                <p className="text-2xl font-black text-amber-400">{stats?.izin || 0}</p>
-              </div>
-              <div className="text-center md:text-left border-l border-white/5 pl-6">
-                <p className="text-[10px] uppercase font-bold opacity-40 mb-1">Telat</p>
-                <p className="text-2xl font-black text-rose-400">{stats?.telat || 0}</p>
-              </div>
-              <div className="text-center md:text-left border-l border-white/5 pl-6">
-                <p className="text-[10px] uppercase font-bold opacity-40 mb-1">Alpha</p>
-                <p className="text-2xl font-black text-slate-500">0</p>
-              </div>
+        {/* STATISTIK */}
+        <section className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+          <div className="flex justify-around items-center">
+            <div className="text-center flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
+              <p className="text-2xl font-black text-blue-600">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
+            </div>
+            <div className="w-px h-10 bg-slate-100"></div>
+            <div className="text-center flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Izin</p>
+              <p className="text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
+            </div>
+            <div className="w-px h-10 bg-slate-100"></div>
+            <div className="text-center flex-1">
+              <p className="text-[10px] uppercase font-bold opacity-40">Terlambat</p>
+              <p className="text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
+            </div>
+            <div className="w-px h-10 bg-slate-100"></div>
+            <div className="text-center flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
+              <p className="text-2xl font-black text-slate-300">0</p>
             </div>
           </div>
         </section>

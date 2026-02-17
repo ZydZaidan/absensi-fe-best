@@ -64,12 +64,11 @@ const Absensi = () => {
     try {
         const token = localStorage.getItem('token');
         
-        // PAYLOAD DISINKRONKAN DENGAN BACKEND (Ganti catatan_telat -> late_reason)
         const payload = {
             foto: photo,          
             latitude: location.lat,
             longitude: location.lng,
-            late_reason: lateReason, // <-- PERBAIKAN DI SINI
+            late_reason: lateReason, 
             status: isLate ? 'telat' : 'hadir'
         };
 
