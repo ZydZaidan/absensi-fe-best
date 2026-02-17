@@ -94,7 +94,6 @@ const AdminDashboard = () => {
               <div className='bg-blue-600 w-fit px-3 py-1 rounded-full mb-3 shadow-lg shadow-blue-900/20 border border-blue-400/20'>
                 <p className='text-[8px] font-black uppercase tracking-[0.2em]'>Administrator Mode</p>
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mb-1">Selamat Datang</p>
               <h2 className="md:text-4xl text-2xl font-black flex items-center gap-2 italic">
                 {adminData?.name || 'Admin'} 
               </h2>
