@@ -138,33 +138,51 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        {/* STATISTIK */}
-        <section className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-          <div className="flex justify-around items-center">
-            <div className="text-center flex-1">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
-              <p className="text-2xl font-black text-blue-600">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
+        {/* STATISTIK (Responsive Grid: Mobile 3-2, Desktop 1 Baris) */}
+        <section className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+          <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-6 lg:gap-0">
+            
+            {/* 1. HADIR - Mobile: 2 dari 6 kolom (1/3 baris) */}
+            <div className="col-span-2 text-center lg:flex-1">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
+              <p className="text-xl md:text-2xl font-black text-blue-600">{(stats?.hadir || 0) + (stats?.telat || 0)}</p>
             </div>
-            <div className="w-px h-10 bg-slate-100"></div>
-            <div className="text-center flex-1">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Izin</p>
-              <p className="text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
+
+            {/* Divider Desktop Only */}
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 2. IZIN - Mobile: 2 dari 6 kolom (1/3 baris) */}
+            <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
+              <p className="text-xl md:text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
             </div>
-            <div className="w-px h-10 bg-slate-100"></div>
-            <div className="text-center flex-1">
-              <p className="text-[10px] uppercase font-bold opacity-40">Terlambat</p>
-              <p className="text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
+
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 3. PULANG CEPAT (Dipindah ke urutan 3 agar sebaris di HP) */}
+            <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pulang Cepat</p>
+              <p className="text-xl md:text-2xl font-black text-slate-300">0</p>
             </div>
-            <div className="w-px h-10 bg-slate-100"></div>
-            <div className="text-center flex-1">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-              <p className="text-2xl font-black text-slate-300">0</p>
+
+            {/* Divider Desktop Only */}
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 4. TERLAMBAT - Mobile: 3 dari 6 kolom (1/2 baris) */}
+            <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-50">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Terlambat</p>
+              <p className="text-xl md:text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
-            <div className="w-px h-10 bg-slate-100"></div>
-            <div className="text-center flex-1">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pulang Cepat</p>
-              <p className="text-2xl font-black text-slate-300">0</p>
+
+            {/* Divider Desktop Only */}
+            <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+
+            {/* 5. ALPHA - Mobile: 3 dari 6 kolom (1/2 baris) */}
+            <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-l border-slate-50 lg:border-none">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
+              <p className="text-xl md:text-2xl font-black text-slate-300">0</p>
             </div>
+
           </div>
         </section>
 
