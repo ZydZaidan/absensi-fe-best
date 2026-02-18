@@ -149,7 +149,9 @@ const Dashboard = () => {
             {/* 2. IZIN - Mobile: 2 dari 6 kolom (1/3 baris) */}
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
-              <p className="text-xl md:text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
+              <p className="text-xl md:text-2xl font-black text-amber-500">
+                {(stats?.izin || 0) + (stats?.sakit || 0) + (stats?.cuti || 0)}
+              </p>
             </div>
 
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>

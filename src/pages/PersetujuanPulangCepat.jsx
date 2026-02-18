@@ -34,30 +34,25 @@ const PersetujuanPulangCepat = () => {
   };
 
   const handleAction = async (id, status) => {
-    const actionText = status === 'disetujui' ? 'MENYETUJUI' : 'MENOLAK';
-    if (!window.confirm(`Apakah Anda yakin ingin ${actionText} pengajuan ini?`)) return;
+    const finalStatus = status === 'approved' ? 'disetujui' : 'ditolak';
+    if (!window.confirm(`Apakah Anda yakin ingin ${finalStatus} pengajuan ini?`)) return;
 
-    setActionId(id);
     try {
       const token = localStorage.getItem('token');
-      // Endpoint sesuai note BE
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
-        { status: status },
+      // Pastikan endpoint mengarah ke /admin/approve-izin/
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-izin/${id}`, 
+        { status: finalStatus }, // Payload status sesuai BE
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+      
       if (response.data.success) {
-        alert(`Berhasil: Pengajuan telah ${status}`);
-        // Hapus dari list setelah aksi sukses
-        setRequests(requests.filter(req => req.id !== id));
+          alert("Berhasil memproses izin!");
+          setRequests(requests.filter(r => r.id !== id));
       }
     } catch (err) {
-      console.error(err);
-      alert("Gagal memproses aksi. Cek koneksi server.");
-    } finally {
-      setActionId(null);
+      alert("Gagal: " + (err.response?.data?.message || "Internal Server Error"));
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-12">
