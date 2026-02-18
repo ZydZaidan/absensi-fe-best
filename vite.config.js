@@ -10,6 +10,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
+        id: '/smart-presence-best', // ID unik aplikasi
+        start_url: '.',
+        display: 'standalone', // Menghilangkan bar navigasi browser
+        orientation: 'portrait',
         name: 'Smart Presence PT BEST',
         short_name: 'PresenceBEST',
         description: 'Aplikasi Absensi Karyawan PT BEST',
