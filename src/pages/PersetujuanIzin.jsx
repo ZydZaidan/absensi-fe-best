@@ -50,7 +50,7 @@ const handleAction = async (id, status) => {
           alert(`Pengajuan telah ${finalStatus}`);
           setRequests(requests.filter(r => r.id !== id));
       }
-    } catch {
+    } catch (err) {
       alert("Gagal memproses persetujuan.");
     }
 };
