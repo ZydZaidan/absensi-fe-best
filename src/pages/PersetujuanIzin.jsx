@@ -51,7 +51,9 @@ const handleAction = async (id, status) => {
           setRequests(requests.filter(r => r.id !== id));
       }
     } catch (err) {
-      alert("Gagal memproses persetujuan.");
+      const errorMsg = err.response?.data?.message || "Terjadi kesalahan sistem.";
+      console.error("Detail Error BE:", err.response?.data);
+      alert(`Gagal: ${errorMsg}`);
     }
 };
 
