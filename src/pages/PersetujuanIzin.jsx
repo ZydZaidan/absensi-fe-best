@@ -51,7 +51,11 @@ const handleAction = async (id, status) => {
           setRequests(requests.filter(r => r.id !== id));
       }
     } catch (err) {
-      alert("lanjut.");
+      // INI YANG BAKAL BONGKAR KEBOHONGAN BE LU
+    console.error("FULL ERROR DARI BE:", err.response);
+    
+    const pesanError = err.response?.data?.message || err.message;
+    alert(`Gagal Bro! Kata BE: ${pesanError}`)
     }
 };
 
