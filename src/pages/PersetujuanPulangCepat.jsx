@@ -33,30 +33,31 @@ const PersetujuanPulangCepat = () => {
     }
   };
 
-  const handleAction = async (id, status, userId) => { // Tambahkan userId di parameter
-    const finalStatus = status === 'disetujui' ? 'disetujui' : 'ditolak';
-    if (!window.confirm(`Apakah Anda yakin ingin ${finalStatus} pengajuan ini?`)) return;
+const handleAction = async (id, status, userId) => { 
+  // Sekarang status dikirim langsung: 'disetujui' atau 'ditolak'
+  const finalStatus = status; 
+  
+  if (!window.confirm(`Apakah Anda yakin ingin ${finalStatus} pengajuan ini?`)) return;
 
-    setActionId(id); // Set loading untuk tombol ini
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
-        { 
-          status: finalStatus,
-          user_id: userId // PENTING: Kirimkan user_id ke backend
-        }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      if (response.data.success) {
-          alert("Berhasil memproses pengajuan!");
-          setRequests(requests.filter(r => r.id !== id));
-      }
-    } catch (err) {
-      alert("Gagal: " + (err.response?.data?.message || "Internal Server Error"));
-    } finally {
-      setActionId(null);
-    }
+  setActionId(id);
+  try {
+    const token = localStorage.getItem('token');
+    await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
+      { 
+        status: finalStatus, 
+        user_id: userId 
+      }, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    // Jika sukses, hapus dari list tampilan
+    setRequests(requests.filter(r => r.id !== id));
+    alert(`Berhasil! Pengajuan telah ${finalStatus}.`);
+  } catch (err) {
+    alert("Gagal: " + (err.response?.data?.message || "Internal Server Error"));
+  } finally {
+    setActionId(null);
+  }
 };
 
   return (
