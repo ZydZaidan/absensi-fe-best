@@ -39,8 +39,7 @@ const PersetujuanPulangCepat = () => {
 
     try {
       const token = localStorage.getItem('token');
-      // Pastikan endpoint mengarah ke /admin/approve-izin/
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-izin/${id}`, 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
         { status: finalStatus }, // Payload status sesuai BE
         { headers: { Authorization: `Bearer ${token}` } }
       );
