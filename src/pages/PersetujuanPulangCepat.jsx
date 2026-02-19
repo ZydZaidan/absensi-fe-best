@@ -33,23 +33,29 @@ const PersetujuanPulangCepat = () => {
     }
   };
 
-  const handleAction = async (id, status) => {
-    const finalStatus = status === 'approved' ? 'disetujui' : 'ditolak';
+  const handleAction = async (id, status, userId) => { // Tambahkan userId di parameter
+    const finalStatus = status === 'disetujui' ? 'disetujui' : 'ditolak';
     if (!window.confirm(`Apakah Anda yakin ingin ${finalStatus} pengajuan ini?`)) return;
 
+    setActionId(id); // Set loading untuk tombol ini
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
-        { status: finalStatus }, // Payload status sesuai BE
+        { 
+          status: finalStatus,
+          user_id: userId // PENTING: Kirimkan user_id ke backend
+        }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       if (response.data.success) {
-          alert("Berhasil memproses izin!");
+          alert("Berhasil memproses pengajuan!");
           setRequests(requests.filter(r => r.id !== id));
       }
     } catch (err) {
       alert("Gagal: " + (err.response?.data?.message || "Internal Server Error"));
+    } finally {
+      setActionId(null);
     }
 };
 
@@ -125,7 +131,7 @@ const PersetujuanPulangCepat = () => {
                     <td className="px-8 py-6">
                       <div className="flex justify-center gap-3">
                         <button 
-                          onClick={() => handleAction(req.id, 'disetujui')}
+                          onClick={() => handleAction(req.id, 'disetujui', req.user_id)}
                           disabled={actionId === req.id}
                           className="p-3.5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-100 active:scale-90 transition-all disabled:opacity-50"
                           title="Setujui"
@@ -134,7 +140,7 @@ const PersetujuanPulangCepat = () => {
                         </button>
                         
                         <button 
-                          onClick={() => handleAction(req.id, 'ditolak')}
+                          onClick={() => handleAction(req.id, 'ditolak', req.user_id)}
                           disabled={actionId === req.id}
                           className="p-3.5 bg-rose-500 text-white rounded-2xl hover:bg-rose-600 shadow-lg shadow-rose-100 active:scale-90 transition-all disabled:opacity-50"
                           title="Tolak"
