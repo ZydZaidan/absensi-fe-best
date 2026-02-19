@@ -34,30 +34,34 @@ const PersetujuanPulangCepat = () => {
   };
 
 const handleAction = async (id, status, userId) => { 
-  // Sekarang status dikirim langsung: 'disetujui' atau 'ditolak'
-  const finalStatus = status; 
-  
-  if (!window.confirm(`Apakah Anda yakin ingin ${finalStatus} pengajuan ini?`)) return;
-
-  setActionId(id);
-  try {
-    const token = localStorage.getItem('token');
-    await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
-      { 
-        status: finalStatus, 
-        user_id: userId 
-      }, 
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // Pastikan status yang dikirim adalah 'disetujui' atau 'ditolak'
+    const finalStatus = status; 
     
-    // Jika sukses, hapus dari list tampilan
-    setRequests(requests.filter(r => r.id !== id));
-    alert(`Berhasil! Pengajuan telah ${finalStatus}.`);
-  } catch (err) {
-    alert("Gagal: " + (err.response?.data?.message || "Internal Server Error"));
-  } finally {
-    setActionId(null);
-  }
+    // PERBAIKAN: Kalimat konfirmasi mengikuti tombol yang diklik
+    const actionText = finalStatus === 'disetujui' ? 'MENYETUJUI' : 'MENOLAK';
+    if (!window.confirm(`Apakah Anda yakin ingin ${actionText} pengajuan ini?`)) return;
+
+    setActionId(id);
+    try {
+      const token = localStorage.getItem('token');
+      // Pastikan URL API sudah benar mengarah ke approve-pulang-cepat
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-pulang-cepat/${id}`, 
+        { 
+          status: finalStatus, 
+          user_id: userId 
+        }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (response.data.success) {
+          alert(`Berhasil! Pengajuan telah ${finalStatus}.`);
+          setRequests(requests.filter(r => r.id !== id));
+      }
+    } catch (err) {
+      alert("Gagal: " + (err.response?.data?.message || "Internal Server Error"));
+    } finally {
+      setActionId(null);
+    }
 };
 
   return (
@@ -129,27 +133,23 @@ const handleAction = async (id, status, userId) => {
                       </div>
                     </td>
 
-                    <td className="px-8 py-6">
-                      <div className="flex justify-center gap-3">
-                        <button 
-                          onClick={() => handleAction(req.id, 'disetujui', req.user_id)}
-                          disabled={actionId === req.id}
-                          className="p-3.5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-100 active:scale-90 transition-all disabled:opacity-50"
-                          title="Setujui"
-                        >
-                          {actionId === req.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleAction(req.id, 'ditolak', req.user_id)}
-                          disabled={actionId === req.id}
-                          className="p-3.5 bg-rose-500 text-white rounded-2xl hover:bg-rose-600 shadow-lg shadow-rose-100 active:scale-90 transition-all disabled:opacity-50"
-                          title="Tolak"
-                        >
-                          {actionId === req.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </td>
+<div className="flex justify-center gap-3">
+  {/* TOMBOL SETUJUI (HIJAU) */}
+  <button 
+    onClick={() => handleAction(req.id, 'disetujui', req.user_id)}
+    className="p-3.5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-all"
+  >
+    <Check className="w-4 h-4" />
+  </button>
+
+  {/* TOMBOL TOLAK (MERAH) - SUDAH ADA DI SINI */}
+  <button 
+    onClick={() => handleAction(req.id, 'ditolak', req.user_id)}
+    className="p-3.5 bg-rose-500 text-white rounded-2xl hover:bg-rose-600 transition-all"
+  >
+    <X className="w-4 h-4" />
+  </button>
+</div>
                   </tr>
                 )) : (
                   <tr>
