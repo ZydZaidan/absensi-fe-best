@@ -98,7 +98,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 ml-1 text-blue-600">NIK Karyawan</label>
+            <label className="block text-sm font-semibold ml-1 text-blue-600">NIK KTP</label>
             <input 
               required 
               name="nik_ktp" 
