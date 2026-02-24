@@ -8,11 +8,10 @@ const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false); 
   
-  // 1. UPDATE STATE: Tambahkan nik_karyawan
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    nik_karyawan: '', // Variabel baru sesuai BE
+    nik_ktp: '', // Variabel baru sesuai BE
     jabatan: '',
     nomor_hp: '',
     id_cabang: '',
@@ -98,15 +97,14 @@ const Register = () => {
             />
           </div>
 
-          {/* 2. ADD UI: NIK Karyawan (Di bawah Nama Lengkap) */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 ml-1 text-blue-600">NIK Karyawan</label>
             <input 
               required 
-              name="nik_karyawan" 
+              name="nik_ktp" 
               type="text" 
               placeholder="Masukkan 16 digit NIK" 
-              value={formData.nik_karyawan}
+              value={formData.nik_ktp}
               onChange={handleChange}
               className="w-full mt-1 px-4 py-3 rounded-xl bg-white/50 border border-blue-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-medium" 
             />
