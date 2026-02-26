@@ -8,10 +8,12 @@ const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false); 
   
+  // 1. UPDATE STATE: nik_ktp & status_pegawai
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    nik_ktp: '', // Variabel baru sesuai BE
+    nik_ktp: '', // Sinkron dengan BE
+    status_pegawai: '', // Field baru
     jabatan: '',
     nomor_hp: '',
     id_cabang: '',
@@ -44,9 +46,10 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Mengirim formData dengan struktur baru ke server
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, formData);
       if (response.data.success) {
-        alert("Pendaftaran Berhasil! Silakan tunggu verifikasi admin.");
+        alert("Pendaftaran Berhasil! Akun anda akan disinkronkan via NIK KTP.");
         navigate('/');
       }
     } catch (error) {
@@ -64,14 +67,14 @@ const Register = () => {
 
       <div className="relative z-20 max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-white/20">
         <header className="mb-8 text-center md:text-left">
-          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Daftar Akun Karyawan</h1>
-          <p className="text-gray-500 text-xs font-medium mt-1">Lengkapi data diri untuk akses sistem absensi.</p>
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight italic">Daftar Akun Karyawan</h1>
+          <p className="text-gray-500 text-xs font-medium mt-1">Lengkapi data untuk sinkronisasi Profil Perusahaan.</p>
         </header>
 
         <form onSubmit={handleRegister} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 ml-1">Email Karyawan</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Email</label>
             <input 
               required 
               name="email" 
@@ -85,7 +88,7 @@ const Register = () => {
 
           {/* Nama Lengkap */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 ml-1">Nama Lengkap</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Nama Lengkap</label>
             <input 
               required 
               name="name" 
@@ -97,13 +100,14 @@ const Register = () => {
             />
           </div>
 
+          {/* NIK KTP */}
           <div>
-            <label className="block text-sm font-semibold ml-1 text-blue-600">NIK KTP</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-blue-600 ml-1">NIK KTP (16 Digit)</label>
             <input 
               required 
               name="nik_ktp" 
               type="text" 
-              placeholder="Masukkan 16 digit NIK" 
+              placeholder="Masukkan NIK KTP Anda" 
               value={formData.nik_ktp}
               onChange={handleChange}
               className="w-full mt-1 px-4 py-3 rounded-xl bg-white/50 border border-blue-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-medium" 
@@ -113,12 +117,12 @@ const Register = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Jabatan */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 ml-1">Jabatan</label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Jabatan</label>
               <input 
                 required 
                 name="jabatan" 
                 type="text" 
-                placeholder="Staff IT" 
+                placeholder="Contoh: Staff IT" 
                 value={formData.jabatan}
                 onChange={handleChange}
                 className="w-full mt-1 px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-medium" 
@@ -126,7 +130,7 @@ const Register = () => {
             </div>
             {/* No HP */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 ml-1">No. HP (WA)</label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">No. HP (WA)</label>
               <input 
                 required 
                 name="nomor_hp" 
@@ -139,9 +143,28 @@ const Register = () => {
             </div>
           </div>
 
+          {/* NEW: Status Pegawai Dropdown */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Status Pegawai</label>
+            <select 
+              required 
+              name="status_pegawai" 
+              value={formData.status_pegawai}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:border-blue-500 appearance-none transition-all font-bold text-sm text-gray-700 cursor-pointer"
+            >
+              <option value="">-- Pilih Status --</option>
+              <option value="PKWTT">PKWTT</option>
+              <option value="PKWT">PKWT</option>
+              <option value="THL">THL</option>
+              <option value="Konsultan">Konsultan</option>
+              <option value="Magang">Magang</option>
+            </select>
+          </div>
+
           {/* Dropdown Cabang */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 ml-1">Kantor Cabang</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Kantor Cabang</label>
             <select 
               required 
               name="id_cabang" 
@@ -160,23 +183,23 @@ const Register = () => {
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 ml-1">Buat Password</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 ml-1">Buat Password</label>
             <div className="relative mt-1">
                 <input 
-                required 
-                name="password" 
-                type={showPassword ? 'text' : 'password'} 
-                placeholder="••••••••" 
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all pr-12 font-medium" 
+                  required 
+                  name="password" 
+                  type={showPassword ? 'text' : 'password'} 
+                  placeholder="••••••••" 
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all pr-12 font-medium" 
                 />
                 <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
                 >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
             </div>
             <p className="text-[10px] text-slate-400 mt-2 ml-1 font-medium italic">Min. 8 characters</p>
