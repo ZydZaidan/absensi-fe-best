@@ -3,14 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   ArrowLeft, Check, X, Loader2, 
-  FileText, Calendar, User, Eye, CheckCircle 
+  FileText, Calendar, Eye, CheckCircle 
 } from 'lucide-react';
 
 const PersetujuanIzin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
-  const [selectedDoc, setSelectedDoc] = useState(null); // Untuk modal preview surat
+  const [selectedDoc, setSelectedDoc] = useState(null);
+
+  // Helper Anti Gambar Pecah
+  const fixUrl = (url) => {
+    if (!url) return null;
+    return url.replace('http://', 'https://');
+  };
 
   useEffect(() => {
     fetchPendingIzin();
@@ -31,10 +37,8 @@ const PersetujuanIzin = () => {
     }
   };
 
-// Ganti fungsi handleAction di PersetujuanIzin.jsx menjadi ini:
-
-const handleAction = async (id, status) => {
-    // Sesuaikan status dengan kemauan BE (disetujui/ditolak)
+  const handleAction = async (id, status) => {
+    // Sesuai Note BE: status harus 'disetujui' atau 'ditolak'
     const finalStatus = status === 'approved' ? 'disetujui' : 'ditolak';
     
     if (!window.confirm(`Yakin ingin ${finalStatus} pengajuan ini?`)) return;
@@ -42,7 +46,7 @@ const handleAction = async (id, status) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/approve-izin/${id}`, 
-        { status: finalStatus }, // Kirim "disetujui" atau "ditolak"
+        { status: finalStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -51,13 +55,11 @@ const handleAction = async (id, status) => {
           setRequests(requests.filter(r => r.id !== id));
       }
     } catch (err) {
-      // INI YANG BAKAL BONGKAR KEBOHONGAN BE LU
-    console.error("FULL ERROR DARI BE:", err.response);
-    
-    const pesanError = err.response?.data?.message || err.message;
-    alert(`Gagal Bro! Kata BE: ${pesanError}`)
+      console.error("FULL ERROR DARI BE:", err.response);
+      const pesanError = err.response?.data?.message || err.message;
+      alert(`Gagal! Kata BE: ${pesanError}`);
     }
-};
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-12">
@@ -68,11 +70,11 @@ const handleAction = async (id, status) => {
           <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-all">
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
-          <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter">Persetujuan Izin & Cuti</h1>
+          <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800">Persetujuan Izin & Cuti</h1>
         </div>
         <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 flex items-center gap-2">
             <FileText className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-black text-emerald-700">{requests.length} Menunggu</span>
+            <span className="text-xs font-black text-emerald-700 uppercase">{requests.length} Menunggu</span>
         </div>
       </header>
 
@@ -85,8 +87,8 @@ const handleAction = async (id, status) => {
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <th className="px-8 py-6">Karyawan</th>
-                  <th className="px-8 py-6">Jenis</th>
-                  <th className="px-8 py-6">Rentang Tanggal</th>
+                  <th className="px-8 py-6 text-center">Jenis</th>
+                  <th className="px-8 py-6 text-center">Rentang Tanggal</th>
                   <th className="px-8 py-6">Alasan</th>
                   <th className="px-8 py-6 text-center">Bukti</th>
                   <th className="px-8 py-6 text-center">Aksi</th>
@@ -98,30 +100,40 @@ const handleAction = async (id, status) => {
                 ) : requests.length > 0 ? requests.map((req) => (
                   <tr key={req.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-6">
-                      <p className="font-black text-slate-800">{req.user?.name}</p>
-                      <p className="text-[10px] text-slate-400 uppercase">{req.user?.jabatan || 'Staff'}</p>
+                      <p className="font-black text-slate-800 uppercase italic">{req.user?.name || 'User'}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">{req.user?.jabatan || 'Staff'}</p>
                     </td>
-                    <td className="px-8 py-6">
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${
-                            req.jenis_izin === 'sakit' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'
+
+                    {/* PERBAIKAN: Gunakan 'kategori' dan berikan warna yang sesuai */}
+                    <td className="px-8 py-6 text-center">
+                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                            req.kategori === 'sakit' ? 'bg-rose-100 text-rose-700' : 
+                            req.kategori === 'cuti' ? 'bg-blue-100 text-blue-700' :
+                            req.kategori === 'dinas' ? 'bg-purple-100 text-purple-700' :
+                            'bg-emerald-100 text-emerald-700'
                         }`}>
-                            {req.jenis_izin}
+                            {req.kategori || 'Izin'}
                         </span>
                     </td>
-                    <td className="px-8 py-6 text-xs text-slate-600">
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-3 h-3 text-emerald-500" />
-                            {req.tanggal_mulai} s/d {req.tanggal_selesai}
+
+                    <td className="px-8 py-6 text-[10px] text-slate-600 text-center font-bold">
+                        <div className="flex flex-col items-center">
+                            <span>{req.tanggal_mulai}</span>
+                            <span className="text-[8px] text-slate-300 my-0.5 uppercase">s/d</span>
+                            <span>{req.tanggal_selesai}</span>
                         </div>
                     </td>
+
                     <td className="px-8 py-6 max-w-xs truncate italic text-slate-500">"{req.keterangan}"</td>
+                    
                     <td className="px-8 py-6 text-center">
                         {req.foto_url ? (
-                            <button onClick={() => setSelectedDoc(req.foto_url)} className="p-2 bg-slate-100 rounded-xl text-slate-600 hover:bg-blue-600 hover:text-white transition-all">
+                            <button onClick={() => setSelectedDoc(fixUrl(req.foto_url))} className="p-2 bg-slate-100 rounded-xl text-slate-600 hover:bg-blue-600 hover:text-white transition-all">
                                 <Eye className="w-4 h-4" />
                             </button>
                         ) : <span className="text-slate-200">-</span>}
                     </td>
+
                     <td className="px-8 py-6">
                         <div className="flex justify-center gap-2">
                             <button onClick={() => handleAction(req.id, 'approved')} className="p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-100 transition-all active:scale-90">
@@ -142,19 +154,17 @@ const handleAction = async (id, status) => {
         </section>
       </main>
 
-      {/* MODAL PREVIEW SURAT DOKTER / BUKTI */}
+      {/* MODAL PREVIEW */}
       {selectedDoc && (
-        <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm">
-            <div className="relative bg-white p-2 rounded-4xl shadow-2xl max-w-lg w-full animate-in zoom-in duration-300">
+        <div className="fixed inset-0 z-2000 flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm" onClick={() => setSelectedDoc(null)}>
+            <div className="relative bg-white p-2 rounded-4xl shadow-2xl max-w-lg w-full animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
                 <button onClick={() => setSelectedDoc(null)} className="absolute -top-4 -right-4 bg-rose-600 text-white p-3 rounded-full shadow-xl"><X /></button>
-                <img src={selectedDoc} className="w-full h-auto rounded-4xl" alt="Dokumen Bukti" />
-                <div className="p-6 text-center">
-                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Lampiran Dokumen Pengajuan</p>
+                <div className="rounded-4xl overflow-hidden">
+                    <img src={selectedDoc} className="w-full h-auto" alt="Dokumen Bukti" />
                 </div>
             </div>
         </div>
       )}
-
     </div>
   );
 };
