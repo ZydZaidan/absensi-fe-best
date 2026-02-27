@@ -6,8 +6,8 @@ import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { 
-  Camera, CheckCircle, XCircle, 
-  ArrowLeft, Navigation, AlertTriangle, ScanFace,
+  CheckCircle, XCircle, 
+  ArrowLeft, Navigation, AlertTriangle,
   Loader2
 } from 'lucide-react';
 import axios from 'axios'; 
@@ -36,7 +36,6 @@ const Absensi = () => {
   const [location, setLocation] = useState(null);
   const [distance, setDistance] = useState(null);
   const [isWithinRange, setIsWithinRange] = useState(false);
-  const [photo, setPhoto] = useState(null);
   const [lateReason, setLateReason] = useState('');
   const [accuracy, setAccuracy] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -50,9 +49,6 @@ const Absensi = () => {
     return now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 30);
   }, []);
 
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-
   // FUNGSI KIRIM DATA KE LARAVEL (FIXED)
   const submitAbsen = async () => {
     // 1. Validasi Frontend
@@ -65,7 +61,6 @@ const Absensi = () => {
         const token = localStorage.getItem('token');
         
         const payload = {
-            foto: photo,          
             latitude: location.lat,
             longitude: location.lng,
             late_reason: lateReason, 
@@ -180,31 +175,12 @@ const Absensi = () => {
                 </div>
                 <button 
                   disabled={!isWithinRange}
-                  onClick={startCamera}
+                  onClick={() => setStep(3)} // LANGSUNG KE STEP 3
                   className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
                 >
-                  <Camera className="w-5 h-5" /> Ambil Foto Selfie
+                  Konfirmasi
                 </button>
             </div>
-          </div>
-        )}
-
-        {/* STEP 2: KAMERA */}
-        {step === 2 && (
-          <div className="fixed inset-0 bg-slate-900 z-2000 flex flex-col items-center justify-center p-4">
-            <div className="relative w-full max-w-2xl aspect-3/4 md:aspect-video bg-black rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-800">
-                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover scale-x-[-1]" />
-                <div className="absolute inset-0 border-16 border-black/20 pointer-events-none flex items-center justify-center">
-                    <div className="w-64 h-80 border-2 border-dashed border-white/50 rounded-full opacity-30"></div>
-                </div>
-            </div>
-            <div className="mt-10 flex gap-6">
-                <button onClick={() => setStep(1)} className="p-5 bg-white/10 rounded-full text-white hover:bg-white/20 transition-all"><XCircle /></button>
-                <button onClick={capturePhoto} className="p-10 bg-blue-600 rounded-full text-white shadow-2xl hover:scale-110 active:scale-90 border-8 border-white/20 transition-all">
-                    <ScanFace className="w-8 h-8" />
-                </button>
-            </div>
-            <canvas ref={canvasRef} className="hidden" />
           </div>
         )}
 

@@ -6,8 +6,8 @@ import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { 
-  Camera, CheckCircle, XCircle, 
-  ArrowLeft, Navigation, AlertTriangle, ScanFace, Loader2
+  CheckCircle, XCircle, 
+  ArrowLeft, Navigation, AlertTriangle, Loader2
 } from 'lucide-react';
 import axios from 'axios'; 
 
@@ -33,7 +33,6 @@ const AbsensiPulang = () => {
   const [location, setLocation] = useState(null);
   const [distance, setDistance] = useState(null);
   const [isWithinRange, setIsWithinRange] = useState(false);
-  const [photo, setPhoto] = useState(null);
   const [accuracy, setAccuracy] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -50,9 +49,7 @@ const AbsensiPulang = () => {
   // ----------------------------------------
 
   const OFFICE_COORDS = useMemo(() => ({ lat: -6.244867901200337, lng: 106.87230989592847 }), []); 
-  
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+
 
   const handleSubmit = async () => {
     // Validasi alasan jika pulang cepat
@@ -65,7 +62,6 @@ const AbsensiPulang = () => {
         const token = localStorage.getItem('token');
         
         const payload = {
-            foto: photo,
             latitude: location.lat,
             longitude: location.lng,
             alasan: isEarly ? alasanPulangCepat : null
@@ -178,10 +174,10 @@ const AbsensiPulang = () => {
                   </div>
                   <button 
                     disabled={!isWithinRange}
-                    onClick={startCamera}
+                    onClick={() => setStep(3)}
                     className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-orange-600 text-white shadow-xl shadow-orange-200 active:scale-95' : 'bg-slate-100 text-slate-300'}`}
                   >
-                    <Camera className="w-5 h-5" /> Lanjut Foto Pulang
+                    <Camera className="w-5 h-5" /> Konfirmasi
                   </button>
               </div>
             </div>

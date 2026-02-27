@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Search, Loader2, MapPin, Camera, X, ImageOff } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, MapPin, X, ImageOff } from 'lucide-react';
 
 const RekapAbsensi = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [daftarCabang, setDaftarCabang] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewTitle, setPreviewTitle] = useState("");
 
   const [filter, setFilter] = useState({
     bulan: new Date().getMonth() + 1,
@@ -115,7 +113,6 @@ const RekapAbsensi = () => {
                   <th className="px-8 py-6">Karyawan</th>
                   <th className="px-8 py-6 text-center">Tanggal</th>
                   <th className="px-8 py-6 text-center">Masuk / Pulang</th>
-                  <th className="px-8 py-6 text-center">Bukti Foto</th>
                   <th className="px-8 py-6 text-center">Status</th>
                   <th className="px-8 py-6">Cabang</th>
                 </tr>
@@ -134,21 +131,6 @@ const RekapAbsensi = () => {
                     </td>
                     <td className="px-8 py-5 text-center text-sm font-black text-slate-700">
                         {row.jam_masuk?.slice(0,5) || '--:--'} <span className="text-slate-200 mx-1">|</span> {row.jam_pulang?.slice(0,5) || '--:--'}
-                    </td>
-                    <td className="px-8 py-5 text-center">
-                        <div className="flex justify-center gap-2">
-                            {row.foto_masuk_url ? (
-                                <button onClick={() => { setSelectedImage(fixUrl(row.foto_masuk_url)); setPreviewTitle("Bukti Foto Masuk"); }} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm">
-                                    <Camera className="w-4 h-4" />
-                                </button>
-                            ) : <div className="p-2.5 bg-slate-50 text-slate-100 rounded-xl"><ImageOff className="w-4 h-4" /></div>}
-
-                            {row.foto_pulang_url ? (
-                                <button onClick={() => { setSelectedImage(fixUrl(row.foto_pulang_url)); setPreviewTitle("Bukti Foto Pulang"); }} className="p-2.5 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all shadow-sm">
-                                    <Camera className="w-4 h-4" />
-                                </button>
-                            ) : <div className={`p-2.5 rounded-xl ${row.jam_pulang ? 'bg-slate-50 text-slate-100' : 'bg-transparent'}`}>{row.jam_pulang && <ImageOff className="w-4 h-4" />}</div>}
-                        </div>
                     </td>
                     {/* KOLOM STATUS - UPDATE: Double Status & All Categories */}
                     <td className="px-8 py-5 text-center">
@@ -181,23 +163,6 @@ const RekapAbsensi = () => {
           </div>
         </section>
       </main>
-
-      {/* POPUP PREVIEW FOTO */}
-      {selectedImage && (
-        <div className="fixed inset-0 z-2000 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onClick={() => setSelectedImage(null)}></div>
-            <div className="relative bg-white p-2 rounded-4xl shadow-2xl max-w-sm w-full animate-in zoom-in duration-300 overflow-hidden">
-                <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 bg-rose-600 text-white p-2 rounded-full shadow-xl z-50"><X /></button>
-                <div className="aspect-3/4 bg-slate-100 rounded-4xl overflow-hidden">
-                    <img src={selectedImage} alt="Bukti" className="w-full h-full object-cover" onError={(e) => { e.target.src = "https://placehold.co/600x800?text=File+Sangat+Rahasia+(Cek+Storage+Link)"; }} />
-                </div>
-                <div className="p-6 text-center">
-                    <h3 className="font-black text-slate-800 uppercase tracking-tighter text-lg">{previewTitle}</h3>
-                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Verifikasi Keaslian PT BEST</p>
-                </div>
-            </div>
-        </div>
-      )}
     </div>
   );
 };
