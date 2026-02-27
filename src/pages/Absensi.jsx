@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import axios from 'axios'; 
 
-// Konfigurasi Icon Leaflet agar muncul di Production (Vercel)
 const DefaultIcon = L.icon({
     iconUrl: markerIcon,
     shadowUrl: markerShadow,
@@ -21,7 +20,6 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Komponen untuk update pusat peta otomatis
 const RecenterMap = ({ coords }) => {
   const map = useMap();
   useEffect(() => {
@@ -32,7 +30,7 @@ const RecenterMap = ({ coords }) => {
 
 const Absensi = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1); // 1: Map, 3: Konfirmasi
   const [location, setLocation] = useState(null);
   const [distance, setDistance] = useState(null);
   const [isWithinRange, setIsWithinRange] = useState(false);
@@ -40,18 +38,14 @@ const Absensi = () => {
   const [accuracy, setAccuracy] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Koordinat Kantor (Testing)
   const OFFICE_COORDS = useMemo(() => ({ lat: -6.245358520910364, lng: 106.87237966608049 }), []); 
   
-  // Logika Cek Terlambat (WIB)
   const isLate = useMemo(() => {
     const now = new Date();
     return now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() > 30);
   }, []);
 
-  // FUNGSI KIRIM DATA KE LARAVEL (FIXED)
   const submitAbsen = async () => {
-    // 1. Validasi Frontend
     if (isLate && !lateReason.trim()) {
         return alert("Anda terdeteksi terlambat. Mohon isi alasan keterlambatan!");
     }
@@ -59,12 +53,12 @@ const Absensi = () => {
     setLoading(true);
     try {
         const token = localStorage.getItem('token');
-        
         const payload = {
             latitude: location.lat,
             longitude: location.lng,
             late_reason: lateReason, 
-            status: isLate ? 'telat' : 'hadir'
+            status: isLate ? 'telat' : 'hadir',
+            foto: null // Kirim null karena kamera dihapus
         };
 
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/absen-masuk`, payload, {
@@ -76,15 +70,13 @@ const Absensi = () => {
             navigate('/dashboard'); 
         }
     } catch (err) {
-        console.error(err);
-        const msg = err.response?.data?.message || "Gagal mengirim absensi. Coba lagi.";
+        const msg = err.response?.data?.message || "Gagal mengirim absensi.";
         alert("Error: " + msg);
     } finally {
         setLoading(false);
     }
   };
 
-  // Tracking Lokasi User
   useEffect(() => {
     if (step === 1) {
       const watchId = navigator.geolocation.watchPosition((pos) => {
@@ -99,39 +91,15 @@ const Absensi = () => {
         const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
         const d = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         setDistance(Math.round(d));
-        setIsWithinRange(d <= 100); // Radius 100m untuk testing
+        setIsWithinRange(d <= 100);
       }, (err) => console.error(err), { enableHighAccuracy: true });
       return () => navigator.geolocation.clearWatch(watchId);
     }
   }, [step, OFFICE_COORDS]);
 
-  const startCamera = async () => {
-    setStep(2);
-    setTimeout(async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-        if (videoRef.current) videoRef.current.srcObject = stream;
-      } catch { 
-        alert("Gagal akses kamera. Pastikan izin kamera diberikan."); 
-        setStep(1); 
-      }
-    }, 200);
-  };
-
-  const capturePhoto = () => {
-    const context = canvasRef.current.getContext('2d');
-    canvasRef.current.width = videoRef.current.videoWidth;
-    canvasRef.current.height = videoRef.current.videoHeight;
-    context.drawImage(videoRef.current, 0, 0);
-    setPhoto(canvasRef.current.toDataURL('image/jpeg'));
-    videoRef.current.srcObject.getTracks().forEach(t => t.stop());
-    setStep(3);
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       
-      {/* HEADER */}
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-1000 p-4 md:px-10 flex items-center justify-between border-b border-slate-100">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-all group">
@@ -141,16 +109,15 @@ const Absensi = () => {
           </div>
           <div className="hidden md:flex bg-blue-50 px-4 py-2 rounded-xl items-center gap-3">
               <Navigation className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-bold text-blue-800">Akurasi GPS: {accuracy}m</span>
+              <span className="text-xs font-bold text-blue-800 tracking-widest uppercase">GPS: {accuracy}m</span>
           </div>
       </header>
 
       <main className="max-w-7xl mx-auto p-4 md:p-10">
         
-        {/* STEP 1: VALIDASI LOKASI */}
         {step === 1 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-500">
-            <div className="lg:col-span-2 h-100 md:h-125 rounded-4xl overflow-hidden shadow-inner border border-slate-200 z-0 relative">
+            <div className="lg:col-span-2 h-100 md:h-150 rounded-4xl overflow-hidden shadow-inner border border-slate-200 z-0 relative">
               {location && (
                 <MapContainer center={[location.lat, location.lng]} zoom={17} zoomControl={false} className="h-full w-full">
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -170,36 +137,28 @@ const Absensi = () => {
                         {isWithinRange ? 'Lokasi Terjangkau' : 'Diluar Jangkauan'}
                     </h2>
                     <p className="text-sm font-medium text-slate-400 mt-2 px-4">
-                        {isWithinRange ? 'Anda berada dalam radius aman untuk melakukan absensi.' : `Jarak Anda: ${distance}m dari titik kantor.`}
+                        {isWithinRange ? 'Jarak aman. Silakan lanjut untuk konfirmasi.' : `Jarak Anda: ${distance}m dari titik kantor.`}
                     </p>
                 </div>
                 <button 
                   disabled={!isWithinRange}
-                  onClick={() => setStep(3)} // LANGSUNG KE STEP 3
-                  className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                  onClick={() => setStep(3)} 
+                  className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
                 >
-                  Konfirmasi
+                  Lanjut Konfirmasi
                 </button>
             </div>
           </div>
         )}
 
-        {/* STEP 3: KONFIRMASI */}
         {step === 3 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in slide-in-from-bottom-10 duration-500">
-            <div className="relative group">
-                <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-indigo-600 rounded-[3rem] blur opacity-25"></div>
-                <div className="relative bg-white p-4 rounded-4xl shadow-2xl">
-                    <img src={photo} className="w-full h-100 md:h-125 object-cover rounded-4xl" alt="Selfie" />
-                </div>
-            </div>
+          <div className="flex flex-col items-center justify-center py-10 animate-in slide-in-from-bottom-10 max-w-2xl mx-auto">
+            <header className="text-center mb-10">
+                <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic">Konfirmasi <span className="text-blue-600">Kehadiran</span></h2>
+                <p className="text-slate-400 font-medium mt-2 italic">Data lokasi Anda akan dicatat sebagai bukti kehadiran.</p>
+            </header>
 
-            <div className="flex flex-col justify-center space-y-8">
-                <header>
-                    <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic">Konfirmasi <span className="text-blue-600">Kehadiran</span></h2>
-                    <p className="text-slate-400 font-medium mt-2">Pastikan wajah terlihat jelas sebelum dikirim.</p>
-                </header>
-
+            <div className="w-full space-y-8">
                 {isLate ? (
                     <div className="bg-rose-50 border border-rose-100 rounded-4xl p-8 space-y-4">
                         <div className="flex items-center gap-3 text-rose-600 font-black uppercase text-sm tracking-widest">
@@ -209,7 +168,7 @@ const Absensi = () => {
                         <textarea 
                             value={lateReason}
                             onChange={(e) => setLateReason(e.target.value)}
-                            placeholder="Alasan telat (Wajib isi)..."
+                            placeholder="Tuliskan alasan keterlambatan Anda..."
                             className="w-full p-5 bg-white rounded-2xl text-sm font-medium border-none shadow-inner focus:ring-2 focus:ring-rose-500 outline-none min-h-30"
                         />
                     </div>
@@ -218,7 +177,7 @@ const Absensi = () => {
                         <div className="bg-white p-3 rounded-2xl shadow-sm text-emerald-500"><CheckCircle className="w-8 h-8" /></div>
                         <div>
                             <p className="text-emerald-800 font-black uppercase tracking-widest text-sm">Hadir Tepat Waktu</p>
-                            <p className="text-xs text-emerald-600/70 font-bold">Terima kasih atas kedisiplinan Anda.</p>
+                            <p className="text-xs text-emerald-600/70 font-bold italic">Terima kasih atas kedisiplinan Anda hari ini.</p>
                         </div>
                     </div>
                 )}
@@ -227,7 +186,7 @@ const Absensi = () => {
                     <button 
                         onClick={submitAbsen}
                         disabled={loading}
-                        className="flex-1 py-5 bg-blue-600 text-white rounded-3xl font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                        className="flex-1 py-5 bg-blue-600 text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl shadow-blue-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                     >
                         {loading ? <Loader2 className="animate-spin" /> : 'Kirim Absensi'}
                     </button>
