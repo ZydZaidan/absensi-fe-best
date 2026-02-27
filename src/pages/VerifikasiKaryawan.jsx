@@ -11,9 +11,6 @@ const VerifikasiKaryawan = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
-
-  // 1. STATE UNTUK MENAMPUNG PILIHAN ROLE PER USER
-  // Formatnya: { userId: 'karyawan' | 'admin' }
   const [selectedRoles, setSelectedRoles] = useState({});
 
   useEffect(() => {
@@ -31,7 +28,6 @@ const VerifikasiKaryawan = () => {
       const data = response.data.data || [];
       setUsers(data);
 
-      // 2. INISIALISASI ROLE DEFAULT 'karyawan' UNTUK SEMUA USER YANG BARU DIAMBIL
       const initialRoles = {};
       data.forEach(u => {
         initialRoles[u.id] = 'karyawan';
@@ -46,10 +42,7 @@ const VerifikasiKaryawan = () => {
   };
 
   const handleRoleChange = (userId, newRole) => {
-    setSelectedRoles(prev => ({
-      ...prev,
-      [userId]: newRole
-    }));
+    setSelectedRoles(prev => ({ ...prev, [userId]: newRole }));
   };
 
   const handleActivate = async (userId) => {
@@ -59,11 +52,7 @@ const VerifikasiKaryawan = () => {
     setActionLoading(userId);
     try {
       const token = localStorage.getItem('token');
-      
-      // 3. PAYLOAD DISESUAIKAN DENGAN BACKEND (Minta is_admin boolean)
-      const payload = {
-        is_admin: roleChoice === 'admin'
-      };
+      const payload = { is_admin: roleChoice === 'admin' };
 
       await axios.put(`${import.meta.env.VITE_API_URL}/admin/activate-user/${userId}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -82,7 +71,6 @@ const VerifikasiKaryawan = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-10">
       
-      {/* HEADER */}
       <header className="bg-white sticky top-0 z-50 p-6 md:px-12 flex items-center justify-between border-b border-slate-100 shadow-sm">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 rounded-full transition-all group">
@@ -98,16 +86,14 @@ const VerifikasiKaryawan = () => {
 
       <main className="max-w-6xl mx-auto p-6 space-y-8">
         
-        {/* HERO INFO */}
         <section className="bg-linear-to-br from-slate-800 to-slate-900 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden">
             <div className="relative z-10 space-y-2">
                 <h2 className="text-3xl font-black italic tracking-tight">Persetujuan Akun 🛡️</h2>
-                <p className="text-sm opacity-60 max-w-md">Tentukan peran (Role) dan aktifkan akun pendaftar baru untuk memberikan akses sistem.</p>
+                <p className="text-sm opacity-60 max-w-md">Daftar calon karyawan yang baru saja mendaftar. Pastikan data diri mereka sesuai sebelum memberikan akses masuk.</p>
             </div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full -mr-20 -mt-20 blur-3xl"></div>
         </section>
 
-        {/* LIST KARYAWAN */}
         <section className="space-y-4">
             {loading ? (
                 <div className="py-32 flex flex-col items-center gap-4 text-slate-300">
@@ -119,29 +105,34 @@ const VerifikasiKaryawan = () => {
                     {users.map((user) => (
                         <div key={user.id} className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-center justify-between gap-6">
                             
-                            {/* Kiri: User Info */}
                             <div className="flex items-center gap-5 w-full">
                                 <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 shrink-0 font-black text-xl">
                                     {user.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="truncate">
                                     <p className="text-lg font-black text-slate-800 truncate leading-tight">{user.name}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md">{user.jabatan || 'Calon Staff'}</p>
+                                    
+                                    {/* AREA BADGE JABATAN & STATUS PEGAWAI */}
+                                    <div className="flex items-center flex-wrap gap-2 mt-2">
+                                        <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
+                                            {user.jabatan || 'Calon Staff'}
+                                        </p>
+                                        {/* BADGE BARU: STATUS PEGAWAI (PKWTT, PKWT, dll) */}
+                                        <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-1 rounded-md border border-amber-100">
+                                            {user.status_pegawai || 'THL'}
+                                        </p>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 font-medium truncate mt-1">{user.email}</p>
+
+                                    <p className="text-[10px] text-slate-400 font-medium truncate mt-2">{user.email}</p>
                                 </div>
                             </div>
 
-                            {/* Kanan: Dropdown Role & Tombol ACC */}
                             <div className="flex items-center gap-3 w-full sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0">
-                                
-                                {/* 4. DROPDOWN PEMILIHAN ROLE */}
-                                <div className="flex-1 sm:w-32 relative">
+                                <div className="flex-1 sm:w-32">
                                     <select 
                                         value={selectedRoles[user.id] || 'karyawan'}
                                         onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                        className="w-full p-3.5 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer"
+                                        className="w-full p-3 bg-slate-50 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
                                     >
                                         <option value="karyawan">Karyawan</option>
                                         <option value="admin">Admin</option>
@@ -157,11 +148,7 @@ const VerifikasiKaryawan = () => {
                                         : 'bg-emerald-500 text-white shadow-emerald-100 hover:bg-emerald-600'
                                     }`}
                                 >
-                                    {actionLoading === user.id ? (
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                    ) : (
-                                        <ShieldCheck className="w-5 h-5" />
-                                    )}
+                                    {actionLoading === user.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
                                 </button>
                             </div>
 
