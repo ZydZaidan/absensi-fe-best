@@ -24,12 +24,9 @@ const AdminDashboard = () => {
   // LOGIKA ALPHA PRIBADI (REAL-TIME)
   // ==========================================
   const getCalculatedAlpha = () => {
-    // const sekarang = new Date();
-    // const hariSekarang = sekarang.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
-    // const jamSekarang = sekarang.getHours();
-    const sekarang = true;
-    const hariSekarang = true; // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
-    const jamSekarang = true;
+    const sekarang = new Date();
+    const hariSekarang = sekarang.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
+    const jamSekarang = sekarang.getHours();
     
     const jamMulaiAlpha = 21;
     const jamSelesaiAlpha = 23;
