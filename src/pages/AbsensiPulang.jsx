@@ -142,7 +142,7 @@ const AbsensiPulang = () => {
                 {location && (
                   <MapContainer center={[location.lat, location.lng]} zoom={17} zoomControl={false} className="h-full w-full">
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <Circle center={[OFFICE_COORDS.lat, OFFICE_COORDS.lng]} radius={50} pathOptions={{ color: '#ea580c', fillColor: '#ea580c', fillOpacity: 0.2 }} />
+                    <Circle center={[OFFICE_COORDS.lat, OFFICE_COORDS.lng]} radius={OFFICE_COORDS.radius} pathOptions={{ color: '#ea580c', fillColor: '#ea580c', fillOpacity: 0.2 }} />
                     <Marker position={[location.lat, location.lng]} />
                     <RecenterMap coords={location} />
                   </MapContainer>
