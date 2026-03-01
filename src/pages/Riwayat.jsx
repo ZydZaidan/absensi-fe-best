@@ -183,21 +183,35 @@ const Riwayat = () => {
                                 </div>
                                 
                                 <div>
-                                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
-                                            item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
-                                            item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
-                                            item.status === 'alpha' ? 'bg-slate-200 text-slate-500' :
-                                            'bg-amber-100 text-amber-700'
-                                        }`}>
-                                            {item.status}
-                                        </span>
-
-                                        {item.status_pulang_cepat === 'disetujui' && (
-                                            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase bg-orange-100 text-orange-700 border border-orange-200">
-                                                Pulang Cepat
+                                    <div>
+                                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                                            
+                                            {/* 1. BADGE STATUS UTAMA */}
+                                            <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                                                item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
+                                                item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
+                                                item.status === 'alpha' ? 'bg-slate-200 text-slate-500' :
+                                                'bg-amber-100 text-amber-700'
+                                            }`}>
+                                                {item.status}
                                             </span>
-                                        )}
+
+                                            {/* 2. TAMBAHAN: BADGE DOUBLE STAT (+ IZIN) */}
+                                            {(item.is_permission === true || item.is_permission === 1) && (
+                                                <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200 flex items-center gap-1 shadow-sm">
+                                                    <span className="w-1 h-1 rounded-full bg-indigo-500"></span>
+                                                    IZIN
+                                                </span>
+                                            )}
+
+                                            {/* 3. BADGE PULANG CEPAT */}
+                                            {item.status_pulang_cepat === 'disetujui' && (
+                                                <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">
+                                                    Pulang Cepat
+                                                </span>
+                                            )}
+                                            
+                                        </div>
                                     </div>
                                     <div className="mt-2">
                                         <p className="text-lg font-black text-slate-800 tracking-tight leading-tight">

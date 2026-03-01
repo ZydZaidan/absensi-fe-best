@@ -231,15 +231,21 @@ const RekapAbsensi = () => {
                               {currentStatus}
                           </span>
                           
-                          {/* FIX 1: Gunakan ternary operator buat cegah render angka 0 */}
-                          {(row.is_permission === true || row.is_permission === 1) ? (
-                              <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">IZIN</span>
-                          ) : null}
+                      {/* 2. BADGE DOUBLE STAT (+ IZIN) */}
+                      {/* Ngecek kalau is_permission true atau 1 dari database */}
+                      {(row.is_permission === true || row.is_permission === 1) && (
+                          <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm flex items-center gap-1 animate-in zoom-in duration-300">
+                            <span className="w-1 h-1 rounded-full bg-indigo-500"></span>
+                            IZIN
+                          </span>
+                      )}
 
-                          {/* FIX 2: Tampilkan lagi badge Pulang Cepat */}
-                          {row.status_pulang_cepat === 'disetujui' ? (
-                              <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">PC</span>
-                          ) : null}
+                      {/* 3. BADGE PULANG CEPAT (Opsional, kalau ada) */}
+                      {row.status_pulang_cepat === 'disetujui' && (
+                          <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">
+                            PC
+                          </span>
+                      )}
                         </div>
                       </td>
                       <td className="px-8 py-5 text-center text-[10px] text-slate-500 font-medium max-w-37.5 truncate">
