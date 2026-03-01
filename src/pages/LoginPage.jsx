@@ -41,7 +41,7 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden font-sans text-slate-900">
+    <main className="relative h-dvh w-full flex items-center justify-center overflow-hidden font-sans text-slate-900 bg-slate-100">
       <img 
         src={bgBest} 
         alt="Background" 
@@ -49,7 +49,7 @@ const LoginPage = () => {
       />
       <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-      <div className="relative z-20 max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-white/20">
+      <div className="relative z-20 w-[92%] max-w-[400px] bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-2xl p-7 md:p-10 border border-white/20 flex flex-col justify-center animate-in fade-in zoom-in duration-500">
         <header className="text-center mb-10">
           <img src={logoBest} alt="Logo PT BEST" className="w-80 mx-auto mb-2" />
           <p className="text-gray-500 font-medium text-sm">PT BAKTI ENERGI SEJAHTERA</p>
