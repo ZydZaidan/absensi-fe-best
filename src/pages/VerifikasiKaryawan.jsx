@@ -92,13 +92,28 @@ const VerifikasiKaryawan = () => {
     if (!window.confirm("Setujui perubahan password karyawan ini?")) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${import.meta.env.VITE_API_URL}/admin/approve-reset/${id}`, { status: 'disetujui' }, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/admin/approve-reset/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Password berhasil diperbarui!");
       setResetRequests(resetRequests.filter(r => r.id !== id));
     } catch (err) {
       alert("Gagal menyetujui reset.");
+    }
+  };
+//
+  const handleRejectReset = async (id) => {
+    if (!window.confirm("Tolak permintaan reset password ini?")) return;
+    try {
+      const token = localStorage.getItem('token');
+      // Method DELETE sesuai spek BE
+      await axios.delete(`${import.meta.env.VITE_API_URL}/admin/reject-reset/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Permintaan reset berhasil dihapus.");
+      setResetRequests(resetRequests.filter(r => r.id !== id));
+    } catch (err) {
+      alert("Gagal menolak reset.");
     }
   };
 
