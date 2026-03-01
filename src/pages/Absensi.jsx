@@ -59,8 +59,9 @@ const Absensi = () => {
   }, []);
 
   const submitAbsen = async () => {
-    if (isLate && !lateReason.trim()) {
-        return alert("Anda terdeteksi terlambat. Mohon isi alasan keterlambatan!");
+// 2. MODIFIKASI VALIDASI ALASAN
+    if ((isLate || isAbsenDanIzin) && !lateReason.trim()) {
+        return alert(isAbsenDanIzin ? "Mohon isi alasan izin Anda!" : "Anda terdeteksi terlambat. Mohon isi alasan keterlambatan!");
     }
 
     setLoading(true);
@@ -71,7 +72,9 @@ const Absensi = () => {
             longitude: location.lng,
             late_reason: lateReason, 
             status: isLate ? 'telat' : 'hadir',
-            foto: null // Kirim null karena kamera dihapus
+            // 3. TAMBAHKAN FLAG KE PAYLOAD UNTUK BACKEND
+            is_permission: isAbsenDanIzin, 
+            foto: null 
         };
 
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/absen-masuk`, payload, {
@@ -176,6 +179,14 @@ const Absensi = () => {
                   className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
                 >
                   Lanjut Konfirmasi
+                </button>
+
+                <button 
+                    disabled={!isWithinRange}
+                    onClick={() => { setStep(3); setIsAbsenDanIzin(true); }} 
+                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest border-2 transition-all ${isWithinRange ? 'border-amber-500 text-amber-600 hover:bg-amber-50' : 'border-slate-100 text-slate-200'}`}
+                  >
+                    Absen & Izin
                 </button>
             </div>
           </div>

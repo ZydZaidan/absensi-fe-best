@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Search, Loader2, MapPin, X, ImageOff, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, MapPin, X, ImageOff, FileSpreadsheet, Key } from 'lucide-react';
 // IMPORT LIBRARY EXCEL
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -45,7 +45,6 @@ const RekapAbsensi = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        console.log("Data Rekap dari Server:", response.data.data);
         setData(response.data.data || []);
       } catch (err) {
         if (err.response?.status === 401) { localStorage.clear(); navigate('/'); }
@@ -65,39 +64,41 @@ const RekapAbsensi = () => {
     // 1. Grouping data berdasarkan Nama Cabang
     const groupedData = data.reduce((acc, row) => {
       const cabangName = row.user?.branch?.nama_cabang || 'Kantor Pusat';
-      if (!acc[cabangName]) acc[accabangName] = [];
+      if (!acc[cabangName]) acc[cabangName] = [];
       acc[cabangName].push(row);
       return acc;
     }, {});
 
     // 2. Buat Sheet untuk setiap Cabang
     Object.keys(groupedData).forEach((cabang) => {
-      // Excel punya limit nama sheet max 31 karakter
       const worksheet = workbook.addWorksheet(cabang.substring(0, 31));
 
-      // Set Header Kolom
+      // Set Header Kolom - DITAMBAHKAN KOLOM KETERANGAN/IZIN
       worksheet.columns = [
         { header: 'NAMA KARYAWAN', key: 'nama', width: 30 },
         { header: 'JABATAN', key: 'jabatan', width: 20 },
         { header: 'TANGGAL', key: 'tanggal', width: 20 },
         { header: 'JAM MASUK', key: 'masuk', width: 15 },
         { header: 'JAM PULANG', key: 'pulang', width: 15 },
-        { header: 'STATUS', key: 'status', width: 15 },
-        { header: 'PULANG CEPAT', key: 'pc', width: 15 },
+        { header: 'STATUS UTAMA', key: 'status', width: 15 },
+        { header: 'IZIN/PULANG CEPAT', key: 'pc', width: 20 },
+        { header: 'ALASAN', key: 'alasan', width: 35 },
       ];
 
-      // Styling Header (Biar Keren)
       const headerRow = worksheet.getRow(1);
       headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
       headerRow.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: '1E293B' } // Slate 800
+        fgColor: { argb: '1E293B' }
       };
       headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
       // 3. Masukkan Data baris demi baris
       groupedData[cabang].forEach(item => {
+        // Logic Status Gabungan untuk Excel
+        const statusIzin = item.is_permission ? 'IZIN MENINGGALKAN KANTOR' : (item.status_pulang_cepat === 'disetujui' ? 'PULANG CEPAT' : '-');
+        
         const row = worksheet.addRow({
           nama: item.nama_karyawan,
           jabatan: item.user?.jabatan || '-',
@@ -105,22 +106,20 @@ const RekapAbsensi = () => {
           masuk: item.jam_masuk?.slice(0,5) || '--:--',
           pulang: item.jam_pulang?.slice(0,5) || '--:--',
           status: item.status.toUpperCase(),
-          pc: item.status_pulang_cepat === 'disetujui' ? 'YA' : '-'
+          pc: statusIzin,
+          alasan: item.late_reason || item.alasan_izin || '-' // Gabungan kolom alasan
         });
 
-        // Alignment center untuk kolom tengah
         row.getCell('tanggal').alignment = { horizontal: 'center' };
         row.getCell('masuk').alignment = { horizontal: 'center' };
         row.getCell('pulang').alignment = { horizontal: 'center' };
         row.getCell('status').alignment = { horizontal: 'center' };
-        row.getCell('pc').alignment = { horizontal: 'center' };
       });
     });
 
-    // 4. Proses Download File
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const fileName = `REKAP_ABSENSI_${filter.bulan}_${filter.tahun}.xlsx`;
+    const fileName = `REKAP_ABSEN_LENGKAP_${new Date().getTime()}.xlsx`;
     saveAs(blob, fileName);
   };
 
@@ -133,7 +132,6 @@ const RekapAbsensi = () => {
           </button>
           <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800">Rekapitulasi Absensi</h1>
         </div>
-        {/* BUTTON EXCEL DI HEADER (Biar gampang diakses) */}
         <button 
           onClick={handleExportExcel}
           className="hidden md:flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
@@ -143,7 +141,6 @@ const RekapAbsensi = () => {
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* FILTER BOX */}
         <section className="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Bulan</label>
@@ -154,15 +151,13 @@ const RekapAbsensi = () => {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Status Kehadiran</label>
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Status</label>
             <select className="w-full p-3 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none" value={filter.status} onChange={(e) => setFilter({...filter, status: e.target.value})}>
               <option value="">Semua Status</option>
               <option value="hadir">Hadir</option>
               <option value="telat">Terlambat</option>
               <option value="izin">Izin</option>
               <option value="sakit">Sakit</option>
-              <option value="cuti">Cuti</option>
-              <option value="dinas">Dinas Luar</option>
               <option value="alpha">Alpha</option>
             </select>
           </div>
@@ -178,20 +173,13 @@ const RekapAbsensi = () => {
             <input type="date" className="w-full p-3 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none" value={filter.tanggal} onChange={(e) => setFilter({...filter, tanggal: e.target.value})} />
           </div>
           <div className="flex items-end gap-2">
-            <button className="flex-1 p-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+            <button className="flex-1 p-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600">
               <Search className="w-4 h-4" /> Cari
             </button>
-            {/* Tombol Excel Khusus Mobile */}
-            <button 
-              onClick={handleExportExcel}
-              className="md:hidden p-4 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all flex items-center justify-center shadow-lg"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-            </button>
+            <button onClick={handleExportExcel} className="md:hidden p-4 bg-emerald-600 text-white rounded-2xl"><FileSpreadsheet className="w-4 h-4" /></button>
           </div>
         </section>
 
-        {/* DATA TABLE */}
         <section className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -201,12 +189,13 @@ const RekapAbsensi = () => {
                   <th className="px-8 py-6 text-center">Tanggal</th>
                   <th className="px-8 py-6 text-center">Masuk / Pulang</th>
                   <th className="px-8 py-6 text-center">Status</th>
+                  <th className="px-8 py-6 text-center">Alasan</th>
                   <th className="px-8 py-6">Cabang</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 font-medium italic">
                 {loading ? (
-                  <tr><td colSpan="6" className="py-24 text-center"><Loader2 className="animate-spin mx-auto text-blue-600 mb-2" /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sinkronisasi...</p></td></tr>
+                  <tr><td colSpan="6" className="py-24 text-center"><Loader2 className="animate-spin mx-auto text-blue-600" /></td></tr>
                 ) : data.length > 0 ? data.map((row, i) => (
                   <tr key={i} className="hover:bg-slate-50/50 transition-colors group not-italic">
                     <td className="px-8 py-5">
@@ -221,28 +210,28 @@ const RekapAbsensi = () => {
                     </td>
                     <td className="px-8 py-5 text-center">
                       <div className="flex flex-wrap justify-center gap-1.5">
-                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
-                            row.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
-                            row.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
-                            row.status === 'sakit' ? 'bg-red-100 text-red-700' : 
-                            row.status === 'cuti' ? 'bg-blue-100 text-blue-700' : 
-                            row.status === 'dinas' ? 'bg-purple-100 text-purple-700' : 
-                            row.status === 'alpha' ? 'bg-slate-200 text-slate-500' : 
-                            'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${row.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                             {row.status}
                         </span>
+                        {/* BADGE BARU UNTUK IZIN DI HARI YANG SAMA */}
+                        {row.is_permission && (
+                            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">IZIN</span>
+                        )}
                         {row.status_pulang_cepat === 'disetujui' && (
                             <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">PC</span>
                         )}
                       </div>
+                    </td>
+                    {/* KOLOM ALASAN BARU */}
+                    <td className="px-8 py-5 text-center text-[10px] text-slate-500 font-medium max-w-37.5 truncate">
+                      {row.late_reason || row.alasan_izin || '-'}
                     </td>
                     <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase italic">
                         <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Kantor Pusat'}</div>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="6" className="py-24 text-center text-slate-300 font-black uppercase text-xs italic tracking-widest">Data tidak ditemukan</td></tr>
+                  <tr><td colSpan="6" className="py-24 text-center text-slate-300">Data tidak ditemukan</td></tr>
                 )}
               </tbody>
             </table>
