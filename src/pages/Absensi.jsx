@@ -176,21 +176,33 @@ const Absensi = () => {
                 </div>
                 {/* PILIHAN */}
                 <div className="space-y-3 pt-4">
+                  {/* Tombol Hadir Biasa: Tetap membutuhkan isWithinRange */}
                   <button 
                     disabled={!isWithinRange}
                     onClick={() => { setStep(3); setIsAbsenDanIzin(false); }} 
-                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${
+                      isWithinRange 
+                        ? 'bg-blue-600 text-white shadow-xl active:scale-95' 
+                        : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                    }`}
                   >
                     Lanjut Konfirmasi
                   </button>
 
+                  {/* Tombol Absen & Izin: SEKARANG BEBAS (Tanpa disabled isWithinRange) */}
                   <button 
-                    disabled={!isWithinRange}
                     onClick={() => { setStep(3); setIsAbsenDanIzin(true); }} 
-                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest border-2 transition-all ${isWithinRange ? 'border-amber-500 text-amber-600 hover:bg-amber-50 active:scale-95' : 'border-slate-100 text-slate-200 cursor-not-allowed'}`}
+                    className="w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest border-2 border-amber-500 text-amber-600 hover:bg-amber-50 active:scale-95 transition-all"
                   >
                     Absen & Izin
                   </button>
+                  
+                  {/* Note UX Tambahan (Opsional) agar user tidak bingung */}
+                  {!isWithinRange && (
+                    <p className="text-[9px] font-bold text-rose-400 italic mt-2 uppercase tracking-tighter text-center">
+                      *Hadir biasa wajib di lokasi, lapor izin bisa dimana saja.
+                    </p>
+                  )}
                 </div>
             </div>
           </div>
