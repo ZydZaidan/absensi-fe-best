@@ -186,7 +186,7 @@ const AdminDashboard = () => {
         </section>
 
        {/* ACTION BUTTONS (6 Tombol: Mobile 3-3 | Desktop 1 Baris Melebar) */}
-        <section className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100">
+        <section>
           
           <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-y-10 gap-x-2 md:gap-x-6">
             
