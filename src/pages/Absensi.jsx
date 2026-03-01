@@ -173,21 +173,24 @@ const Absensi = () => {
                         {isWithinRange ? 'Jarak aman. Silakan lanjut untuk konfirmasi.' : `Jarak Anda: ${distance}m dari titik kantor.`}
                     </p>
                 </div>
-                <button 
-                  disabled={!isWithinRange}
-                  onClick={() => setStep(3)} 
-                  className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
-                >
-                  Lanjut Konfirmasi
-                </button>
+                {/* PILIHAN */}
+                <div className="space-y-3 pt-4">
+                  <button 
+                    disabled={!isWithinRange}
+                    onClick={() => { setStep(3); setIsAbsenDanIzin(false); }} 
+                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${isWithinRange ? 'bg-blue-600 text-white shadow-xl active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                  >
+                    Lanjut Konfirmasi
+                  </button>
 
-                <button 
+                  <button 
                     disabled={!isWithinRange}
                     onClick={() => { setStep(3); setIsAbsenDanIzin(true); }} 
-                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest border-2 transition-all ${isWithinRange ? 'border-amber-500 text-amber-600 hover:bg-amber-50' : 'border-slate-100 text-slate-200'}`}
+                    className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest border-2 transition-all ${isWithinRange ? 'border-amber-500 text-amber-600 hover:bg-amber-50 active:scale-95' : 'border-slate-100 text-slate-200 cursor-not-allowed'}`}
                   >
                     Absen & Izin
-                </button>
+                  </button>
+                </div>
             </div>
           </div>
         )}
@@ -195,13 +198,39 @@ const Absensi = () => {
         {step === 3 && (
           <div className="flex flex-col items-center justify-center py-10 animate-in slide-in-from-bottom-10 max-w-2xl mx-auto">
             <header className="text-center mb-10">
-                <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic">Konfirmasi <span className="text-blue-600">Kehadiran</span></h2>
-                <p className="text-slate-400 font-medium mt-2 italic">Data lokasi Anda akan dicatat sebagai bukti kehadiran.</p>
+                <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic">
+                  Konfirmasi <span className={isAbsenDanIzin ? "text-amber-500" : "text-blue-600"}>
+                    {isAbsenDanIzin ? 'Izin Kerja' : 'Kehadiran'}
+                  </span>
+                </h2>
+                <p className="text-slate-400 font-medium mt-2 italic">
+                  {isAbsenDanIzin 
+                    ? 'Laporan izin Anda akan diteruskan ke Admin untuk divalidasi.' 
+                    : 'Data lokasi Anda akan dicatat sebagai bukti kehadiran.'}
+                </p>
             </header>
 
             <div className="w-full space-y-8">
-                {isLate ? (
-                    <div className="bg-rose-50 border border-rose-100 rounded-4xl p-8 space-y-4">
+                {/* CASE 1: ABSEN & IZIN (Tampilan Amber/Orange) */}
+                {isAbsenDanIzin ? (
+                    <div className="bg-amber-50 border border-amber-100 rounded-4xl p-8 space-y-4 shadow-sm">
+                        <div className="flex items-center gap-3 text-amber-600 font-black uppercase text-sm tracking-widest">
+                            <Navigation className="w-6 h-6" />
+                            Form Izin Meninggalkan Kantor
+                        </div>
+                        <p className="text-[10px] font-bold text-amber-600/70 italic px-1">
+                          *Anda tetap tercatat hadir, namun memerlukan alasan izin untuk keperluan administrasi.
+                        </p>
+                        <textarea 
+                            value={lateReason}
+                            onChange={(e) => setLateReason(e.target.value)}
+                            placeholder="Tuliskan alasan izin Anda (Contoh: Ada keperluan keluarga mendadak)..."
+                            className="w-full p-6 bg-white rounded-3xl text-sm font-medium border-none shadow-inner focus:ring-2 focus:ring-amber-500 outline-none min-h-40 transition-all"
+                        />
+                    </div>
+                ) : isLate ? (
+                    /* CASE 2: TERLAMBAT (Tampilan Rose/Merah sesuai Gambar) */
+                    <div className="bg-rose-50 border border-rose-100 rounded-4xl p-8 space-y-4 shadow-sm">
                         <div className="flex items-center gap-3 text-rose-600 font-black uppercase text-sm tracking-widest">
                             <AlertTriangle className="w-6 h-6" />
                             Peringatan: Anda Terlambat!
@@ -210,12 +239,15 @@ const Absensi = () => {
                             value={lateReason}
                             onChange={(e) => setLateReason(e.target.value)}
                             placeholder="Tuliskan alasan keterlambatan Anda..."
-                            className="w-full p-5 bg-white rounded-2xl text-sm font-medium border-none shadow-inner focus:ring-2 focus:ring-rose-500 outline-none min-h-30"
+                            className="w-full p-6 bg-white rounded-3xl text-sm font-medium border-none shadow-inner focus:ring-2 focus:ring-rose-500 outline-none min-h-40 transition-all"
                         />
                     </div>
                 ) : (
-                    <div className="bg-emerald-50 border border-emerald-100 p-8 rounded-4xl flex items-center gap-5">
-                        <div className="bg-white p-3 rounded-2xl shadow-sm text-emerald-500"><CheckCircle className="w-8 h-8" /></div>
+                    /* CASE 3: HADIR NORMAL (Tampilan Emerald/Hijau) */
+                    <div className="bg-emerald-50 border border-emerald-100 p-8 rounded-4xl flex items-center gap-5 shadow-sm">
+                        <div className="bg-white p-3 rounded-2xl shadow-sm text-emerald-500">
+                          <CheckCircle className="w-8 h-8" />
+                        </div>
                         <div>
                             <p className="text-emerald-800 font-black uppercase tracking-widest text-sm">Hadir Tepat Waktu</p>
                             <p className="text-xs text-emerald-600/70 font-bold italic">Terima kasih atas kedisiplinan Anda hari ini.</p>
@@ -223,17 +255,19 @@ const Absensi = () => {
                     </div>
                 )}
 
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 pt-4">
                     <button 
                         onClick={submitAbsen}
                         disabled={loading}
-                        className="flex-1 py-5 bg-blue-600 text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl shadow-blue-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                        className={`flex-1 py-5 text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 transition-all ${
+                          isAbsenDanIzin ? 'bg-amber-500 shadow-amber-100' : 'bg-blue-600 shadow-blue-100'
+                        }`}
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : 'Kirim Absensi'}
+                        {loading ? <Loader2 className="animate-spin" /> : isAbsenDanIzin ? 'Kirim Laporan Izin' : 'Kirim Absensi'}
                     </button>
                     <button 
                         disabled={loading}
-                        onClick={() => setStep(1)} 
+                        onClick={() => { setStep(1); setIsAbsenDanIzin(false); }} 
                         className="py-5 px-10 bg-slate-100 text-slate-400 rounded-3xl font-black uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 transition-all"
                     >
                         Batal
