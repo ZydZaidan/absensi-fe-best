@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Search, Loader2, MapPin, X, ImageOff } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, MapPin, X, ImageOff, FileSpreadsheet } from 'lucide-react';
+// IMPORT LIBRARY EXCEL
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 const RekapAbsensi = () => {
   const navigate = useNavigate();
@@ -51,6 +54,76 @@ const RekapAbsensi = () => {
     fetchRekap();
   }, [filter, navigate]);
 
+  // ==========================================
+  // LOGIKA EXPORT EXCEL PER SHEET (CABANG)
+  // ==========================================
+  const handleExportExcel = async () => {
+    if (data.length === 0) return alert("Tidak ada data untuk dieksport!");
+
+    const workbook = new ExcelJS.Workbook();
+    
+    // 1. Grouping data berdasarkan Nama Cabang
+    const groupedData = data.reduce((acc, row) => {
+      const cabangName = row.user?.branch?.nama_cabang || 'Kantor Pusat';
+      if (!acc[cabangName]) acc[accabangName] = [];
+      acc[cabangName].push(row);
+      return acc;
+    }, {});
+
+    // 2. Buat Sheet untuk setiap Cabang
+    Object.keys(groupedData).forEach((cabang) => {
+      // Excel punya limit nama sheet max 31 karakter
+      const worksheet = workbook.addWorksheet(cabang.substring(0, 31));
+
+      // Set Header Kolom
+      worksheet.columns = [
+        { header: 'NAMA KARYAWAN', key: 'nama', width: 30 },
+        { header: 'JABATAN', key: 'jabatan', width: 20 },
+        { header: 'TANGGAL', key: 'tanggal', width: 20 },
+        { header: 'JAM MASUK', key: 'masuk', width: 15 },
+        { header: 'JAM PULANG', key: 'pulang', width: 15 },
+        { header: 'STATUS', key: 'status', width: 15 },
+        { header: 'PULANG CEPAT', key: 'pc', width: 15 },
+      ];
+
+      // Styling Header (Biar Keren)
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '1E293B' } // Slate 800
+      };
+      headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+      // 3. Masukkan Data baris demi baris
+      groupedData[cabang].forEach(item => {
+        const row = worksheet.addRow({
+          nama: item.nama_karyawan,
+          jabatan: item.user?.jabatan || '-',
+          tanggal: item.tanggal_absen ? new Date(item.tanggal_absen).toLocaleDateString('id-ID') : '-',
+          masuk: item.jam_masuk?.slice(0,5) || '--:--',
+          pulang: item.jam_pulang?.slice(0,5) || '--:--',
+          status: item.status.toUpperCase(),
+          pc: item.status_pulang_cepat === 'disetujui' ? 'YA' : '-'
+        });
+
+        // Alignment center untuk kolom tengah
+        row.getCell('tanggal').alignment = { horizontal: 'center' };
+        row.getCell('masuk').alignment = { horizontal: 'center' };
+        row.getCell('pulang').alignment = { horizontal: 'center' };
+        row.getCell('status').alignment = { horizontal: 'center' };
+        row.getCell('pc').alignment = { horizontal: 'center' };
+      });
+    });
+
+    // 4. Proses Download File
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const fileName = `REKAP_ABSENSI_${filter.bulan}_${filter.tahun}.xlsx`;
+    saveAs(blob, fileName);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-10">
       <header className="bg-white sticky top-0 z-40 p-6 md:px-12 flex items-center justify-between border-b border-slate-100 shadow-sm">
@@ -60,10 +133,17 @@ const RekapAbsensi = () => {
           </button>
           <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800">Rekapitulasi Absensi</h1>
         </div>
+        {/* BUTTON EXCEL DI HEADER (Biar gampang diakses) */}
+        <button 
+          onClick={handleExportExcel}
+          className="hidden md:flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+        >
+          <FileSpreadsheet className="w-4 h-4" /> Export Excel
+        </button>
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* FILTER BOX - UPDATE: Menambah 4 status kategori */}
+        {/* FILTER BOX */}
         <section className="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Bulan</label>
@@ -97,9 +177,16 @@ const RekapAbsensi = () => {
             <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Tanggal</label>
             <input type="date" className="w-full p-3 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none" value={filter.tanggal} onChange={(e) => setFilter({...filter, tanggal: e.target.value})} />
           </div>
-          <div className="flex items-end">
-            <button className="w-full p-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+          <div className="flex items-end gap-2">
+            <button className="flex-1 p-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
               <Search className="w-4 h-4" /> Cari
+            </button>
+            {/* Tombol Excel Khusus Mobile */}
+            <button 
+              onClick={handleExportExcel}
+              className="md:hidden p-4 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all flex items-center justify-center shadow-lg"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
             </button>
           </div>
         </section>
@@ -132,7 +219,6 @@ const RekapAbsensi = () => {
                     <td className="px-8 py-5 text-center text-sm font-black text-slate-700">
                         {row.jam_masuk?.slice(0,5) || '--:--'} <span className="text-slate-200 mx-1">|</span> {row.jam_pulang?.slice(0,5) || '--:--'}
                     </td>
-                    {/* KOLOM STATUS - UPDATE: Double Status & All Categories */}
                     <td className="px-8 py-5 text-center">
                       <div className="flex flex-wrap justify-center gap-1.5">
                         <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
@@ -142,7 +228,7 @@ const RekapAbsensi = () => {
                             row.status === 'cuti' ? 'bg-blue-100 text-blue-700' : 
                             row.status === 'dinas' ? 'bg-purple-100 text-purple-700' : 
                             row.status === 'alpha' ? 'bg-slate-200 text-slate-500' : 
-                            'bg-amber-100 text-amber-700' // Default Izin
+                            'bg-amber-100 text-amber-700'
                         }`}>
                             {row.status}
                         </span>
@@ -152,7 +238,7 @@ const RekapAbsensi = () => {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase italic">
-                        <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Pusat'}</div>
+                        <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Kantor Pusat'}</div>
                     </td>
                   </tr>
                 )) : (
