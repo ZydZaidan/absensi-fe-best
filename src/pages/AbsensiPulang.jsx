@@ -30,6 +30,7 @@ const RecenterMap = ({ coords }) => {
 
 const AbsensiPulang = () => {
   const navigate = useNavigate();
+  const [userData] = useState(() => JSON.parse(localStorage.getItem('user')));
   const [step, setStep] = useState(1); // 1: Map, 3: Konfirmasi
   const [location, setLocation] = useState(null);
   const [distance, setDistance] = useState(null);
@@ -38,7 +39,19 @@ const AbsensiPulang = () => {
   const [loading, setLoading] = useState(false);
   const [alasanPulangCepat, setAlasanPulangCepat] = useState('');
 
-  const OFFICE_COORDS = useMemo(() => ({ lat: -6.244867901200337, lng: 106.87230989592847 }), []); 
+  //koordinat dinamis
+  const OFFICE_COORDS = useMemo(() => {
+    // Kita panggil data cabang dari user yang login
+    if (userData?.cabang) {
+        return { 
+            lat: parseFloat(userData.cabang.latitude), 
+            lng: parseFloat(userData.cabang.longitude),
+            radius: userData.cabang.radius_meter || 50 
+        };
+    }
+    // Fallback darurat ke Kantor Pusat Jakarta k
+    return { lat: -6.2452732, lng: 106.8722992, radius: 50 }; 
+  }, [userData]); 
   
   const isEarly = useMemo(() => {
     const now = new Date();
@@ -96,7 +109,7 @@ const AbsensiPulang = () => {
         const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
         const d = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         setDistance(Math.round(d));
-        setIsWithinRange(d <= 100); 
+        setIsWithinRange(d <= OFFICE_COORDS.radius); 
       }, (err) => console.error(err), { enableHighAccuracy: true });
       return () => navigator.geolocation.clearWatch(watchId);
     }
