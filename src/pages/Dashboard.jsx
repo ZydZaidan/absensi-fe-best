@@ -24,21 +24,28 @@ const Dashboard = () => {
   // LOGIKA VIRTUAL ALPHA (REAL-TIME)
   // ==========================================
   const getCalculatedAlpha = () => {
-    const jamPulang = 17;
-    const menitPulang = 30;
+    const sekarang = new Date();
+    const hariSekarang = sekarang.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
+    const jamSekarang = sekarang.getHours();
     
-    // Cek apakah hari ini sudah absen atau izin
-    const sudahAbsenHariIni = todayData !== null;
-    
-    // Cek apakah sekarang sudah lewat jam 17:30
-    const isSudahLewatWaktu = currentTime.getHours() > jamPulang || 
-                             (currentTime.getHours() === jamPulang && currentTime.getMinutes() >= menitPulang);
+    const jamMulaiAlpha = 21;
+    const jamSelesaiAlpha = 23;
 
-    // Jika belum absen dan sudah lewat waktu, maka Alpha hari ini + Alpha di statistik
-    if (!sudahAbsenHariIni && isSudahLewatWaktu) {
+    // 1. CEK HARI LIBUR (Sabtu = 6, Minggu = 0)
+    const isHariKerja = hariSekarang !== 0 && hariSekarang !== 6;
+
+    // 2. CEK APAKAH SUDAH ABSEN
+    const belumAbsenHariIni = todayData === null;
+    
+    // 3. CEK RENTANG WAKTU (21:00 - 23:59)
+    const isWaktuAlpha = jamSekarang >= jamMulaiAlpha && jamSekarang <= jamSelesaiAlpha;
+
+    // Alpha hanya bertambah jika: Hari Kerja DAN Belum Absen DAN Di Jam Alpha
+    if (isHariKerja && belumAbsenHariIni && isWaktuAlpha) {
       return (stats?.alpha || 0) + 1;
     }
 
+    // Jika hari Sabtu/Minggu, atau sudah absen, tampilkan data asli database
     return stats?.alpha || 0;
   };
 
@@ -190,11 +197,11 @@ const Dashboard = () => {
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
             {/* ALPHA STATS - SEKARANG MENGGUNAKAN LOGIKA getCalculatedAlpha */}
-            <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-l border-slate-50 lg:border-none">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-              <p className={`text-xl md:text-2xl font-black ${getCalculatedAlpha() > 0 ? 'text-rose-400' : 'text-slate-300'}`}>
-                {getCalculatedAlpha()}
-              </p>
+            <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-6 lg:pt-0 border-l border-slate-100 lg:border-none">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
+                <p className={`text-xl md:text-3xl font-black ${getCalculatedAlpha() > 0 ? 'text-rose-400' : 'text-slate-300'}`}>
+                    {getCalculatedAlpha()}
+                </p>
             </div>
 
           </div>
