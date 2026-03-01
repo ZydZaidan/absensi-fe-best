@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Search, Loader2, MapPin, X, ImageOff, FileSpreadsheet, Key } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, MapPin, FileSpreadsheet } from 'lucide-react';
 // IMPORT LIBRARY EXCEL
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -41,11 +41,6 @@ const RekapAbsensi = () => {
     }
     
     return 'belum absen';
-  };
-
-  const fixUrl = (url) => {
-    if (!url) return null;
-    return url.replace('http://', 'https://');
   };
 
   useEffect(() => {
@@ -120,7 +115,7 @@ const RekapAbsensi = () => {
           tanggal: item.tanggal_absen ? new Date(item.tanggal_absen).toLocaleDateString('id-ID') : '-',
           masuk: item.jam_masuk?.slice(0,5) || '--:--',
           pulang: item.jam_pulang?.slice(0,5) || '--:--',
-          status: getDisplayStatus(item).toUpperCase(), // Menggunakan logika Alpha Otomatis
+          status: getDisplayStatus(item).toUpperCase(),
           pc: statusIzin,
           alasan: item.late_reason || item.alasan_izin || '-'
         });
@@ -235,9 +230,16 @@ const RekapAbsensi = () => {
                           }`}>
                               {currentStatus}
                           </span>
-                          {row.is_permission && (
+                          
+                          {/* FIX 1: Gunakan ternary operator buat cegah render angka 0 */}
+                          {(row.is_permission === true || row.is_permission === 1) ? (
                               <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">IZIN</span>
-                          )}
+                          ) : null}
+
+                          {/* FIX 2: Tampilkan lagi badge Pulang Cepat */}
+                          {row.status_pulang_cepat === 'disetujui' ? (
+                              <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">PC</span>
+                          ) : null}
                         </div>
                       </td>
                       <td className="px-8 py-5 text-center text-[10px] text-slate-500 font-medium max-w-37.5 truncate">
