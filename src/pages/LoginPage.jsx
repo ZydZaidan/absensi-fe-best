@@ -41,7 +41,7 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden font-sans text-slate-900">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden font-sans text-slate-900">
       <img 
         src={bgBest} 
         alt="Background" 
