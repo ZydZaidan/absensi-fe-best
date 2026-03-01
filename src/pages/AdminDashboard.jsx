@@ -24,20 +24,18 @@ const AdminDashboard = () => {
   // LOGIKA ALPHA PRIBADI (REAL-TIME)
   // ==========================================
   const getCalculatedAlpha = () => {
-    const sekarang = new Date();
-    const hariSekarang = sekarang.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
-    const jamSekarang = sekarang.getHours();
+    // const sekarang = new Date();
+    // const hariSekarang = sekarang.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
+    // const jamSekarang = sekarang.getHours();
+    const sekarang = true;
+    const hariSekarang = true; // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
+    const jamSekarang = true;
     
     const jamMulaiAlpha = 21;
     const jamSelesaiAlpha = 23;
-
-    // 1. CEK HARI LIBUR (Sabtu = 6, Minggu = 0)
+    //HARI LIBUR (Sabtu = 6, Minggu = 0)
     const isHariKerja = hariSekarang !== 0 && hariSekarang !== 6;
-
-    // 2. CEK APAKAH SUDAH ABSEN
     const belumAbsenHariIni = todayData === null;
-    
-    // 3. CEK RENTANG WAKTU (21:00 - 23:59)
     const isWaktuAlpha = jamSekarang >= jamMulaiAlpha && jamSekarang <= jamSelesaiAlpha;
 
     // Alpha hanya bertambah jika: Hari Kerja DAN Belum Absen DAN Di Jam Alpha
