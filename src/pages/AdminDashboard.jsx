@@ -16,30 +16,30 @@ const AdminDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [todayData, setTodayData] = useState(null);
   const [history, setHistory] = useState([]);
-  // Tambahkan 'total_karyawan' ke dalam default state stats
-  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0, total_karyawan: 0 }); 
+  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0, alpha: 0 }); // Tambahkan default alpha
   const [pendingPulangCount, setPendingPulangCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // ==========================================
-  // LOGIKA PENGHITUNG ALPHA OTOMATIS
+  // LOGIKA ALPHA PRIBADI (REAL-TIME)
   // ==========================================
-  const getAlphaCount = () => {
+  const getCalculatedAlpha = () => {
     const jamPulang = 17;
     const menitPulang = 30;
     
-    // Cek apakah waktu sekarang sudah lewat 17:30
+    // Cek apakah Admin (sebagai user) sudah absen atau izin hari ini
+    const sudahAbsenHariIni = todayData !== null;
+    
+    // Cek apakah waktu saat ini sudah lewat jam 17:30
     const isSudahLewatWaktu = currentTime.getHours() > jamPulang || 
                              (currentTime.getHours() === jamPulang && currentTime.getMinutes() >= menitPulang);
 
-    // Jika belum lewat jam pulang, status Alpha tetap 0
-    if (!isSudahLewatWaktu) return 0;
+    // Jika belum ada record absen dan sudah lewat jam pulang, hitung sebagai Alpha
+    if (!sudahAbsenHariIni && isSudahLewatWaktu) {
+      return (stats?.alpha || 0) + 1;
+    }
 
-    // Kalkulasi Alpha: Total Karyawan Aktif - (Semua yang sudah ada data absensinya)
-    const totalAbsenTercatat = (stats?.hadir || 0) + (stats?.telat || 0) + (stats?.izin || 0);
-    const alphaResult = (stats?.total_karyawan || 0) - totalAbsenTercatat;
-    
-    return alphaResult > 0 ? alphaResult : 0;
+    return stats?.alpha || 0;
   };
 
   // 2. FETCH DATA DARI BACKEND
@@ -57,8 +57,8 @@ const AdminDashboard = () => {
 
         setTodayData(resStatus.data.data);
         setHistory(resHistory.data.data || []);
-        // Pastikan Backend mengirim field 'total_karyawan' di dalam object stats
-        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0, total_karyawan: 0 });
+        // Backend mengembalikan stats pribadi milik Admin yang sedang login
+        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0, alpha: 0 });
         setPendingPulangCount(resPending.data.data?.length || 0);
 
       } catch (err) {
@@ -74,6 +74,7 @@ const AdminDashboard = () => {
 
     fetchAdminDashboard();
 
+    // Timer Jam Real-time
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, [navigate]);
@@ -83,6 +84,7 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
+  // 3. LOADING STATE VIEW
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -156,7 +158,7 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        {/* STATISTIK - UPDATE ALPHA LOGIC */}
+        {/* STATISTIK PRIBADI (Update Alpha Logic) */}
         <section className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
           <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-6 lg:gap-0">
             
@@ -169,7 +171,9 @@ const AdminDashboard = () => {
 
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
-              <p className="text-xl md:text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
+              <p className="text-xl md:text-2xl font-black text-amber-500">
+                {(stats?.izin || 0) + (stats?.sakit || 0) + (stats?.cuti || 0)}
+              </p>
             </div>
 
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
@@ -188,17 +192,18 @@ const AdminDashboard = () => {
 
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* ALPHA STATS - SEKARANG DINAMIS MENGGUNAKAN getAlphaCount() */}
+            {/* ALPHA PRIBADI - MENGGUNAKAN LOGIKA getCalculatedAlpha */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-              <p className={`text-xl md:text-2xl font-black ${getAlphaCount() > 0 ? 'text-rose-500' : 'text-slate-300'}`}>
-                {getAlphaCount()}
+              <p className={`text-xl md:text-2xl font-black ${getCalculatedAlpha() > 0 ? 'text-rose-500' : 'text-slate-300'}`}>
+                {getCalculatedAlpha()}
               </p>
             </div>
 
           </div>
         </section>
 
+        {/* ACTION BUTTONS */}
         <section>
           <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-y-10 gap-x-2 md:gap-x-6">
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
@@ -215,7 +220,7 @@ const AdminDashboard = () => {
                   <Camera className="w-7 h-7 sm:w-8 sm:h-8" />
                 </button>
               )}
-              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center">
+              <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">
                 {todayData ? (todayData.jam_pulang ? 'Selesai' : 'Pulang') : 'Absen'}
               </span>
             </div>
@@ -270,6 +275,7 @@ const AdminDashboard = () => {
           </div>
         </section>
 
+        {/* PERSONAL HISTORY LIST */}
         <section className="space-y-6 pt-4">
           <div className="flex justify-between items-end px-2">
             <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest">Riwayat Absensi Saya</h3>
@@ -307,7 +313,7 @@ const AdminDashboard = () => {
                     <p className="text-sm font-black text-slate-800 uppercase italic tracking-tighter">
                         {['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) 
                             ? `PENGADAAN ${item.status}` 
-                            : (item.jam_pulang ? 'Absen Selesai' : 'Absen Masuk')}
+                            : (item.jam_pulang ? 'Absensi Selesai' : 'Absen Masuk')}
                     </p>
                   </div>
                 </div>
