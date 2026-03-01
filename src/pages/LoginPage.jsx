@@ -105,7 +105,8 @@ const LoginPage = () => {
             <div className="flex justify-between items-center mt-2 px-1">
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Min 8 characters</p>
               <button 
-                type="button" 
+                type="button"
+                onClick={() => navigate('/forgot-password')} // Pakai navigate 
                 className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Lupa Password?

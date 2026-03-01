@@ -14,7 +14,7 @@ import VerifikasiKaryawan from './pages/VerifikasiKaryawan';
 import RekapAbsensi from './pages/RekapAbsensi';
 import PersetujuanPulangCepat from './pages/PersetujuanPulangCepat';
 import PersetujuanIzin from './pages/PersetujuanIzin';
-
+import ForgotPassword from './pages/ForgotPassword';
 
 
 
@@ -51,6 +51,8 @@ function App() {
 
         {/* 2. PINDAHKAN INI KE PALING BAWAH (Wildcard Catch-all) */}
         <Route path="*" element={<Navigate to="/" />} />
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </Router>
   );
