@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   ArrowLeft, ShieldCheck, UserCheck, 
-  Loader2, UserPlus, MapPin, Building2 
+  Loader2, UserPlus, MapPin, 
+  Key, Check, X
 } from 'lucide-react';
 
 const VerifikasiKaryawan = () => {
