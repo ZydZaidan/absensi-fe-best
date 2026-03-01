@@ -15,10 +15,32 @@ const Dashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // State untuk Data API
-  const [stats, setStats] = useState({ hadir: 0, izin: 0, alpha: 0 });
+  const [stats, setStats] = useState({ hadir: 0, izin: 0, alpha: 0, telat: 0, pulang_cepat: 0 });
   const [history, setHistory] = useState([]);
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // ==========================================
+  // LOGIKA VIRTUAL ALPHA (REAL-TIME)
+  // ==========================================
+  const getCalculatedAlpha = () => {
+    const jamPulang = 17;
+    const menitPulang = 30;
+    
+    // Cek apakah hari ini sudah absen atau izin
+    const sudahAbsenHariIni = todayData !== null;
+    
+    // Cek apakah sekarang sudah lewat jam 17:30
+    const isSudahLewatWaktu = currentTime.getHours() > jamPulang || 
+                             (currentTime.getHours() === jamPulang && currentTime.getMinutes() >= menitPulang);
+
+    // Jika belum absen dan sudah lewat waktu, maka Alpha hari ini + Alpha di statistik
+    if (!sudahAbsenHariIni && isSudahLewatWaktu) {
+      return (stats?.alpha || 0) + 1;
+    }
+
+    return stats?.alpha || 0;
+  };
 
   // Ambil Data dari Backend saat halaman dibuka
   useEffect(() => {
@@ -27,7 +49,6 @@ const Dashboard = () => {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        // Ambil Status Hari Ini & Riwayat secara paralel
         const [resStatus, resHistory] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/attendance/check-status`, config),
           axios.get(`${import.meta.env.VITE_API_URL}/riwayat-absensi`, config)
@@ -35,7 +56,7 @@ const Dashboard = () => {
 
         setTodayData(resStatus.data.data); 
         setHistory(resHistory.data.data || []);   
-        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0 });
+        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0, alpha: 0, pulang_cepat: 0 });
       } catch (err) {
         console.error("Gagal mengambil data dashboard", err);
         if (err.response?.status === 401) {
@@ -107,7 +128,6 @@ const Dashboard = () => {
 
           <div className="mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl p-8">
             <div className="flex items-center gap-3 mb-6">
-              {/* Logika Status Visual */}
               <div className={`w-3 h-3 rounded-full animate-pulse ${todayData ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
               <span className="text-xl font-black italic tracking-wide">
                 {todayData ? (todayData.jam_pulang ? 'Absensi Selesai' : 'Sudah Masuk') : 'Belum Absen'}
@@ -133,20 +153,17 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* STATISTIK (Responsive Grid: Mobile 3-2, Desktop 1 Baris) */}
+        {/* STATISTIK - UPDATE ALPHA LOGIC */}
         <section className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
           <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-6 lg:gap-0">
             
-            {/* 1. HADIR - Mobile: 2 dari 6 kolom (1/3 baris) */}
             <div className="col-span-2 text-center lg:flex-1">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
               <p className="text-xl md:text-2xl font-black text-blue-600">{(stats?.hadir || 0)}</p>
             </div>
 
-            {/* Divider Desktop Only */}
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 2. IZIN - Mobile: 2 dari 6 kolom (1/3 baris) */}
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
               <p className="text-xl md:text-2xl font-black text-amber-500">
@@ -156,40 +173,35 @@ const Dashboard = () => {
 
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 3. PULANG CEPAT (Dipindah ke urutan 3 agar sebaris di HP) */}
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pulang Cepat</p>
               <p className="text-xl md:text-2xl font-black text-slate-300">{stats?.pulang_cepat || 0}</p>
             </div>
 
-            {/* Divider Desktop Only */}
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 4. TERLAMBAT - Mobile: 3 dari 6 kolom (1/2 baris) */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-50">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Terlambat</p>
               <p className="text-xl md:text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
 
-            {/* Divider Desktop Only */}
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 5. ALPHA - Mobile: 3 dari 6 kolom (1/2 baris) */}
+            {/* ALPHA STATS - SEKARANG MENGGUNAKAN LOGIKA getCalculatedAlpha */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-              <p className="text-xl md:text-2xl font-black text-slate-300">0</p>
+              <p className={`text-xl md:text-2xl font-black ${getCalculatedAlpha() > 0 ? 'text-rose-400' : 'text-slate-300'}`}>
+                {getCalculatedAlpha()}
+              </p>
             </div>
 
           </div>
         </section>
 
-        {/* MAIN BUTTONS (User Friendly: Lingkaran & Satu Baris) */}
+        {/* MAIN BUTTONS */}
         <section className="flex flex-row justify-around items-start gap-2 px-2 py-4 ">
-          
-          {/* --- TOMBOL 1: DINAMIS (ABSEN) --- */}
           <div className="flex flex-col items-center flex-1 max-w-25">
             {!todayData ? (
-              // BELUM ABSEN (BIRU)
               <button 
                 onClick={() => navigate('/absensi')}
                 className="w-14 h-14 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100"
@@ -197,12 +209,10 @@ const Dashboard = () => {
                 <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
               </button>
             ) : todayData.jam_pulang ? (
-              // SELESAI (ABU-ABU)
               <div className="w-14 h-14 sm:w-20 sm:h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center border-2 border-slate-100">
                 <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
             ) : todayData.status_pulang_cepat === 'pending' ? (
-              // PENDING (KUNING)
               <button 
                 disabled
                 className="w-14 h-14 sm:w-20 sm:h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border-2 border-amber-100 animate-pulse cursor-wait"
@@ -210,7 +220,6 @@ const Dashboard = () => {
                 <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
               </button>
             ) : (
-              // PULANG (ORANYE)
               <button 
                 onClick={() => navigate('/absensi-pulang')} 
                 className="w-14 h-14 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100"
@@ -223,7 +232,6 @@ const Dashboard = () => {
             </span>
           </div>
 
-          {/* --- TOMBOL 2: IZIN / SAKIT (HIJAU) --- */}
           <div className="flex flex-col items-center flex-1 max-w-25">
             <button 
               onClick={() => navigate('/izin')}
@@ -236,7 +244,6 @@ const Dashboard = () => {
             </span>
           </div>
 
-          {/* --- TOMBOL 3: RIWAYAT (UNGU) --- */}
           <div className="flex flex-col items-center flex-1 max-w-25">
             <button 
               onClick={() => navigate('/riwayat')}
@@ -248,17 +255,15 @@ const Dashboard = () => {
               Riwayat
             </span>
           </div>
-
         </section>
 
-        {/* HISTORY LIST - UPDATE LOGIC */}
+        {/* HISTORY LIST */}
         <section className="space-y-6 pt-4">
           <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest px-2">History Absensi</h3>
           <div className="space-y-4">
             {history.length > 0 ? history.map((item, i) => (
               <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow group">
                 <div className="flex items-center gap-5">
-                  {/* Lingkaran Tanggal Dinamis */}
                   <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${
                     item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
                     (item.status === 'telat' || item.status === 'sakit') ? 'bg-rose-50 border-rose-100 text-rose-600' : 
@@ -270,7 +275,6 @@ const Dashboard = () => {
 
                   <div>
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      {/* Badge Status Utama */}
                       <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
                         item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
                         item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
@@ -279,7 +283,6 @@ const Dashboard = () => {
                         {item.status}
                       </span>
 
-                      {/* Badge Double Status: Pulang Cepat */}
                       {item.status_pulang_cepat === 'disetujui' && (
                         <span className="px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">
                           PC
@@ -287,7 +290,6 @@ const Dashboard = () => {
                       )}
                     </div>
 
-                    {/* Judul Aktivitas Dinamis */}
                     <p className="text-sm font-black text-slate-800 uppercase italic tracking-tighter">
                       {['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) 
                         ? `PENGADAAN ${item.status}` 
@@ -297,7 +299,6 @@ const Dashboard = () => {
                 </div>
 
                 <div className="text-right">
-                  {/* Jam Masuk (Disembunyikan jika statusnya Cuti/Izin) */}
                   {!['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) && (
                     <p className="text-lg font-black text-slate-800">
                       {item.jam_masuk?.slice(0, 5) || '--:--'}

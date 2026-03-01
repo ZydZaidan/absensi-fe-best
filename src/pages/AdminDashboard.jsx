@@ -16,9 +16,31 @@ const AdminDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [todayData, setTodayData] = useState(null);
   const [history, setHistory] = useState([]);
-  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0 });
+  // Tambahkan 'total_karyawan' ke dalam default state stats
+  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0, total_karyawan: 0 }); 
   const [pendingPulangCount, setPendingPulangCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // ==========================================
+  // LOGIKA PENGHITUNG ALPHA OTOMATIS
+  // ==========================================
+  const getAlphaCount = () => {
+    const jamPulang = 17;
+    const menitPulang = 30;
+    
+    // Cek apakah waktu sekarang sudah lewat 17:30
+    const isSudahLewatWaktu = currentTime.getHours() > jamPulang || 
+                             (currentTime.getHours() === jamPulang && currentTime.getMinutes() >= menitPulang);
+
+    // Jika belum lewat jam pulang, status Alpha tetap 0
+    if (!isSudahLewatWaktu) return 0;
+
+    // Kalkulasi Alpha: Total Karyawan Aktif - (Semua yang sudah ada data absensinya)
+    const totalAbsenTercatat = (stats?.hadir || 0) + (stats?.telat || 0) + (stats?.izin || 0);
+    const alphaResult = (stats?.total_karyawan || 0) - totalAbsenTercatat;
+    
+    return alphaResult > 0 ? alphaResult : 0;
+  };
 
   // 2. FETCH DATA DARI BACKEND
   useEffect(() => {
@@ -35,12 +57,12 @@ const AdminDashboard = () => {
 
         setTodayData(resStatus.data.data);
         setHistory(resHistory.data.data || []);
-        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0 });
+        // Pastikan Backend mengirim field 'total_karyawan' di dalam object stats
+        setStats(resHistory.data.stats || { hadir: 0, telat: 0, izin: 0, total_karyawan: 0 });
         setPendingPulangCount(resPending.data.data?.length || 0);
 
       } catch (err) {
         console.error("Gagal sinkronisasi data dashboard", err);
-        // Jika token tidak valid (Expired), otomatis logout
         if (err.response?.status === 401) {
             localStorage.clear();
             navigate('/');
@@ -52,7 +74,6 @@ const AdminDashboard = () => {
 
     fetchAdminDashboard();
 
-    // Timer Jam Real-time
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, [navigate]);
@@ -62,7 +83,6 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
-  // 3. LOADING STATE VIEW
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -111,7 +131,6 @@ const AdminDashboard = () => {
 
           <div className="mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl p-8">
             <div className="flex items-center gap-3 mb-6">
-              {/* Logika Status Visual */}
               <div className={`w-3 h-3 rounded-full animate-pulse ${todayData ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
               <span className="text-xl font-black italic tracking-wide">
                 {todayData ? (todayData.jam_pulang ? 'Absensi Selesai' : 'Sudah Masuk') : 'Belum Absen'}
@@ -137,20 +156,17 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        {/* STATISTIK (Responsive Grid: Mobile 3-2, Desktop 1 Baris) */}
+        {/* STATISTIK - UPDATE ALPHA LOGIC */}
         <section className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
           <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-6 lg:gap-0">
             
-            {/* 1. HADIR - Mobile: 2 dari 6 kolom (1/3 baris) */}
             <div className="col-span-2 text-center lg:flex-1">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hadir</p>
               <p className="text-xl md:text-2xl font-black text-blue-600">{(stats?.hadir || 0)}</p>
             </div>
 
-            {/* Divider Desktop Only */}
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 2. IZIN - Mobile: 2 dari 6 kolom (1/3 baris) */}
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Izin</p>
               <p className="text-xl md:text-2xl font-black text-amber-500">{stats?.izin || 0}</p>
@@ -158,39 +174,33 @@ const AdminDashboard = () => {
 
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 3. PULANG CEPAT (Dipindah ke urutan 3 agar sebaris di HP) */}
             <div className="col-span-2 text-center lg:flex-1 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pulang Cepat</p>
               <p className="text-xl md:text-2xl font-black text-slate-300">{stats?.pulang_cepat || 0}</p>
             </div>
 
-            {/* Divider Desktop Only */}
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 4. TERLAMBAT - Mobile: 3 dari 6 kolom (1/2 baris) */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-50">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Terlambat</p>
               <p className="text-xl md:text-2xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
 
-            {/* Divider Desktop Only */}
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
 
-            {/* 5. ALPHA - Mobile: 3 dari 6 kolom (1/2 baris) */}
+            {/* ALPHA STATS - SEKARANG DINAMIS MENGGUNAKAN getAlphaCount() */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-4 lg:pt-0 border-l border-slate-50 lg:border-none">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-              <p className="text-xl md:text-2xl font-black text-slate-300">0</p>
+              <p className={`text-xl md:text-2xl font-black ${getAlphaCount() > 0 ? 'text-rose-500' : 'text-slate-300'}`}>
+                {getAlphaCount()}
+              </p>
             </div>
 
           </div>
         </section>
 
-       {/* ACTION BUTTONS (6 Tombol: Mobile 3-3 | Desktop 1 Baris Melebar) */}
         <section>
-          
           <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-between items-start gap-y-10 gap-x-2 md:gap-x-6">
-            
-            {/* 1. ABSEN (Dinamis Pribadi Admin) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               {!todayData ? (
                 <button onClick={() => navigate('/absensi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-blue-100 hover:bg-blue-600 hover:text-white group">
@@ -210,7 +220,6 @@ const AdminDashboard = () => {
               </span>
             </div>
 
-            {/* 2. IZIN / SAKIT (Pribadi) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <button onClick={() => navigate('/izin')} className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white">
                 <Calendar className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -218,7 +227,6 @@ const AdminDashboard = () => {
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Izin</span>
             </div>
 
-            {/* 3. VERIFIKASI AKUN (Admin) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <button onClick={() => navigate('/admin/verifikasi')} className="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-indigo-100 hover:bg-indigo-600 hover:text-white">
                 <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -226,7 +234,6 @@ const AdminDashboard = () => {
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">Verifikasi</span>
             </div>
 
-            {/* 4. ACC PULANG CEPAT (Admin) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <div className="relative">
                 <button onClick={() => navigate('/admin/persetujuan-pulang-cepat')} className="w-16 h-16 sm:w-20 sm:h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-orange-100 hover:bg-orange-600 hover:text-white">
@@ -241,7 +248,6 @@ const AdminDashboard = () => {
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">ACC Pulang</span>
             </div>
 
-            {/* 5. PERSETUJUAN IZIN & CUTI (Admin - Fitur Baru) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <div className="relative">
                 <button 
@@ -250,12 +256,10 @@ const AdminDashboard = () => {
                 >
                   <CalendarCheck className="w-7 h-7 sm:w-8 sm:h-8" />
                 </button>
-                {/* Nanti bisa ditambah badge jumlah izin pending di sini */}
               </div>
               <span className="mt-3 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-tighter text-center leading-tight">ACC Izin</span>
             </div>
 
-            {/* 6. REKAPITULASI (Admin) */}
             <div className="flex flex-col items-center w-[30%] lg:w-auto lg:flex-1">
               <button onClick={() => navigate('/admin/rekap-absen')} className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all border-2 border-purple-100 hover:bg-purple-600 hover:text-white">
                 <Users className="w-7 h-7 sm:w-8 sm:h-8" />
@@ -266,7 +270,6 @@ const AdminDashboard = () => {
           </div>
         </section>
 
-        {/* PERSONAL HISTORY LIST - UPDATE LOGIC */}
         <section className="space-y-6 pt-4">
           <div className="flex justify-between items-end px-2">
             <h3 className="font-black text-slate-800 uppercase text-sm tracking-widest">Riwayat Absensi Saya</h3>
@@ -277,7 +280,6 @@ const AdminDashboard = () => {
             {history.length > 0 ? history.slice(0, 3).map((item, i) => (
               <div key={i} className="bg-white p-6 rounded-4xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all group">
                 <div className="flex items-center gap-5">
-                  {/* Lingkaran Tanggal Dinamis */}
                   <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center ${
                     item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
                     (item.status === 'telat' || item.status === 'sakit') ? 'bg-rose-50 border-rose-100 text-rose-600' : 

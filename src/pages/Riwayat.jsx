@@ -10,11 +10,38 @@ const Riwayat = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0, pulang_cepat: 0 });
+  const [stats, setStats] = useState({ hadir: 0, telat: 0, izin: 0, pulang_cepat: 0, alpha: 0 });
   
   // State untuk Filter
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+
+  // ==========================================
+  // LOGIKA HITUNG ALPHA OTOMATIS (FE SIDE)
+  // ==========================================
+  const getCalculatedAlpha = useCallback(() => {
+    const sekarang = new Date();
+    const jamPulang = 17;
+    const menitPulang = 30;
+
+    // Cek apakah filter bulan & tahun adalah saat ini
+    const isBulanIni = month === (sekarang.getMonth() + 1) && year === sekarang.getFullYear();
+    
+    // Cek apakah hari ini sudah ada di dalam list history
+    const hariIniString = sekarang.toISOString().split('T')[0];
+    const sudahAbsenHariIni = history.some(item => item.tanggal_absen === hariIniString);
+
+    // Cek apakah waktu sudah lewat 17:30
+    const isSudahLewatWaktu = sekarang.getHours() > jamPulang || 
+                             (sekarang.getHours() === jamPulang && sekarang.getMinutes() >= menitPulang);
+
+    // Jika sedang melihat bulan ini, belum ada absen hari ini, dan sudah lewat jam pulang
+    if (isBulanIni && !sudahAbsenHariIni && isSudahLewatWaktu) {
+      return (stats?.alpha || 0) + 1;
+    }
+
+    return stats?.alpha || 0;
+  }, [month, year, history, stats]);
 
   // 1. Ambil Data History
   const fetchHistory = useCallback(async () => {
@@ -26,7 +53,7 @@ const Riwayat = () => {
       });
       
       setHistory(response.data.data || []);
-      setStats(response.data.stats || { hadir: 0, telat: 0, izin: 0, pulang_cepat: 0 });
+      setStats(response.data.stats || { hadir: 0, telat: 0, izin: 0, pulang_cepat: 0, alpha: 0 });
     } catch (err) {
       console.error("Gagal mengambil riwayat:", err);
       if (err.response?.status === 401) {
@@ -95,7 +122,7 @@ const Riwayat = () => {
             </div>
         </section>
 
-        {/* SUMMARY CARDS (Responsive: Mobile 3-2) */}
+        {/* SUMMARY CARDS - UPDATE ALPHA DISPLAY */}
         <section className="bg-white p-6 md:p-8 rounded-4xl shadow-sm border border-slate-100">
         <div className="grid grid-cols-6 lg:flex lg:items-center gap-y-8 lg:gap-0">
             <div className="col-span-2 text-center lg:flex-1">
@@ -118,9 +145,13 @@ const Riwayat = () => {
                 <p className="text-xl md:text-3xl font-black text-rose-500">{stats?.telat || 0}</p>
             </div>
             <div className="hidden lg:block w-px h-10 bg-slate-100 shrink-0"></div>
+            
+            {/* KOLOM ALPHA DENGAN LOGIKA OTOMATIS */}
             <div className="col-span-3 text-center lg:flex-1 border-t lg:border-t-0 pt-6 lg:pt-0 border-l border-slate-100 lg:border-none">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Alpha</p>
-                <p className="text-xl md:text-3xl font-black text-slate-300">0</p>
+                <p className={`text-xl md:text-3xl font-black ${getCalculatedAlpha() > 0 ? 'text-rose-400' : 'text-slate-300'}`}>
+                    {getCalculatedAlpha()}
+                </p>
             </div>
         </div>
         </section>
@@ -139,12 +170,12 @@ const Riwayat = () => {
                     {history.map((item, i) => (
                         <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all group">
                             <div className="flex items-center gap-6">
-                                {/* Warna Lingkaran Dinamis Berdasarkan Status */}
                                 <div className={`w-16 h-16 rounded-full border-2 flex flex-col items-center justify-center shrink-0 ${
                                     item.status === 'hadir' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
                                     item.status === 'telat' ? 'bg-rose-50 border-rose-100 text-rose-600' : 
                                     item.status === 'cuti' ? 'bg-blue-50 border-blue-100 text-blue-600' : 
                                     item.status === 'dinas' ? 'bg-purple-50 border-purple-100 text-purple-600' : 
+                                    item.status === 'alpha' ? 'bg-slate-50 border-slate-200 text-slate-400' :
                                     'bg-amber-50 border-amber-100 text-amber-600'
                                 }`}>
                                     <span className="text-xl font-black leading-none">{new Date(item.tanggal_absen).getDate()}</span>
@@ -153,19 +184,15 @@ const Riwayat = () => {
                                 
                                 <div>
                                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                                        {/* Status Utama */}
                                         <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
                                             item.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
                                             item.status === 'telat' ? 'bg-rose-100 text-rose-700' : 
-                                            item.status === 'sakit' ? 'bg-red-100 text-red-700' : 
-                                            item.status === 'cuti' ? 'bg-blue-100 text-blue-700' : 
-                                            item.status === 'dinas' ? 'bg-purple-100 text-purple-700' : 
+                                            item.status === 'alpha' ? 'bg-slate-200 text-slate-500' :
                                             'bg-amber-100 text-amber-700'
                                         }`}>
                                             {item.status}
                                         </span>
 
-                                        {/* Status Double: Pulang Cepat */}
                                         {item.status_pulang_cepat === 'disetujui' && (
                                             <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase bg-orange-100 text-orange-700 border border-orange-200">
                                                 Pulang Cepat
@@ -176,11 +203,10 @@ const Riwayat = () => {
                                         <p className="text-lg font-black text-slate-800 tracking-tight leading-tight">
                                             {['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) 
                                                 ? `Pengajuan ${item.status.toUpperCase()}` 
-                                                : (item.jam_pulang ? 'Absensi Lengkap' : 'Hanya Absen Masuk')}
+                                                : item.status === 'alpha' ? 'Tidak Ada Keterangan' : (item.jam_pulang ? 'Absensi Lengkap' : 'Hanya Absen Masuk')}
                                         </p>
                                         <div className="flex flex-wrap gap-4 mt-2">
-                                            {/* Jam hanya muncul jika bukan status Izin/Cuti/Dinas */}
-                                            {!['izin', 'sakit', 'cuti', 'dinas'].includes(item.status) && (
+                                            {!['izin', 'sakit', 'cuti', 'dinas', 'alpha'].includes(item.status) && (
                                                 <div className="flex items-center gap-1.5 text-slate-400">
                                                     <Clock className="w-3 h-3" />
                                                     <span className="text-xs font-bold font-mono">
@@ -190,7 +216,9 @@ const Riwayat = () => {
                                             )}
                                             <div className="flex items-center gap-1.5 text-slate-400">
                                                 <MapPin className="w-3 h-3" />
-                                                <span className="text-[10px] font-bold uppercase tracking-widest">Koordinat Tercatat</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest">
+                                                    {item.status === 'alpha' ? 'Lokasi Tidak Terdeteksi' : 'Koordinat Tercatat'}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>

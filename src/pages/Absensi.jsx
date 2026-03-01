@@ -217,7 +217,7 @@ const Absensi = () => {
                     <div className="bg-amber-50 border border-amber-100 rounded-4xl p-8 space-y-4 shadow-sm">
                         <div className="flex items-center gap-3 text-amber-600 font-black uppercase text-sm tracking-widest">
                             <Navigation className="w-6 h-6" />
-                            Form Izin Meninggalkan Kantor
+                            Form Izin
                         </div>
                         <p className="text-[10px] font-bold text-amber-600/70 italic px-1">
                           *Anda tetap tercatat hadir, namun memerlukan alasan izin untuk keperluan administrasi.

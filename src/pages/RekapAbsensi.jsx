@@ -20,6 +20,29 @@ const RekapAbsensi = () => {
     id_cabang: ''
   });
 
+  // ==========================================
+  // LOGIKA VIRTUAL ALPHA (REAL-TIME CHECK)
+  // ==========================================
+  const getDisplayStatus = (row) => {
+    // Jika data dari BE sudah memiliki status (hadir, telat, izin, dsb)
+    if (row.status && row.status !== 'alpha') return row.status;
+    if (row.status === 'alpha') return 'alpha';
+
+    // Jika data kosong, cek apakah sudah melewati jam pulang (17:30)
+    const sekarang = new Date();
+    const jamPulang = 17;
+    const menitPulang = 30;
+
+    const isSudahLewatWaktu = sekarang.getHours() > jamPulang || 
+                             (sekarang.getHours() === jamPulang && sekarang.getMinutes() >= menitPulang);
+
+    if (!row.jam_masuk && isSudahLewatWaktu) {
+      return 'alpha';
+    }
+    
+    return 'belum absen';
+  };
+
   const fixUrl = (url) => {
     if (!url) return null;
     return url.replace('http://', 'https://');
@@ -53,15 +76,11 @@ const RekapAbsensi = () => {
     fetchRekap();
   }, [filter, navigate]);
 
-  // ==========================================
-  // LOGIKA EXPORT EXCEL PER SHEET (CABANG)
-  // ==========================================
   const handleExportExcel = async () => {
     if (data.length === 0) return alert("Tidak ada data untuk dieksport!");
 
     const workbook = new ExcelJS.Workbook();
     
-    // 1. Grouping data berdasarkan Nama Cabang
     const groupedData = data.reduce((acc, row) => {
       const cabangName = row.user?.branch?.nama_cabang || 'Kantor Pusat';
       if (!acc[cabangName]) acc[cabangName] = [];
@@ -69,11 +88,9 @@ const RekapAbsensi = () => {
       return acc;
     }, {});
 
-    // 2. Buat Sheet untuk setiap Cabang
     Object.keys(groupedData).forEach((cabang) => {
       const worksheet = workbook.addWorksheet(cabang.substring(0, 31));
 
-      // Set Header Kolom - DITAMBAHKAN KOLOM KETERANGAN/IZIN
       worksheet.columns = [
         { header: 'NAMA KARYAWAN', key: 'nama', width: 30 },
         { header: 'JABATAN', key: 'jabatan', width: 20 },
@@ -94,9 +111,7 @@ const RekapAbsensi = () => {
       };
       headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-      // 3. Masukkan Data baris demi baris
       groupedData[cabang].forEach(item => {
-        // Logic Status Gabungan untuk Excel
         const statusIzin = item.is_permission ? 'IZIN MENINGGALKAN KANTOR' : (item.status_pulang_cepat === 'disetujui' ? 'PULANG CEPAT' : '-');
         
         const row = worksheet.addRow({
@@ -105,9 +120,9 @@ const RekapAbsensi = () => {
           tanggal: item.tanggal_absen ? new Date(item.tanggal_absen).toLocaleDateString('id-ID') : '-',
           masuk: item.jam_masuk?.slice(0,5) || '--:--',
           pulang: item.jam_pulang?.slice(0,5) || '--:--',
-          status: item.status.toUpperCase(),
+          status: getDisplayStatus(item).toUpperCase(), // Menggunakan logika Alpha Otomatis
           pc: statusIzin,
-          alasan: item.late_reason || item.alasan_izin || '-' // Gabungan kolom alasan
+          alasan: item.late_reason || item.alasan_izin || '-'
         });
 
         row.getCell('tanggal').alignment = { horizontal: 'center' };
@@ -196,41 +211,44 @@ const RekapAbsensi = () => {
               <tbody className="divide-y divide-slate-50 font-medium italic">
                 {loading ? (
                   <tr><td colSpan="6" className="py-24 text-center"><Loader2 className="animate-spin mx-auto text-blue-600" /></td></tr>
-                ) : data.length > 0 ? data.map((row, i) => (
-                  <tr key={i} className="hover:bg-slate-50/50 transition-colors group not-italic">
-                    <td className="px-8 py-5">
-                      <p className="font-black text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{row.nama_karyawan}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{row.user?.jabatan || '-'}</p>
-                    </td>
-                    <td className="px-8 py-5 text-center text-xs font-bold text-slate-600 uppercase">
-                      {row.tanggal_absen ? new Date(row.tanggal_absen).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric'}) : '-'}
-                    </td>
-                    <td className="px-8 py-5 text-center text-sm font-black text-slate-700">
-                        {row.jam_masuk?.slice(0,5) || '--:--'} <span className="text-slate-200 mx-1">|</span> {row.jam_pulang?.slice(0,5) || '--:--'}
-                    </td>
-                    <td className="px-8 py-5 text-center">
-                      <div className="flex flex-wrap justify-center gap-1.5">
-                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${row.status === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                            {row.status}
-                        </span>
-                        {/* BADGE BARU UNTUK IZIN DI HARI YANG SAMA */}
-                        {row.is_permission && (
-                            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">IZIN</span>
-                        )}
-                        {row.status_pulang_cepat === 'disetujui' && (
-                            <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200">PC</span>
-                        )}
-                      </div>
-                    </td>
-                    {/* KOLOM ALASAN BARU */}
-                    <td className="px-8 py-5 text-center text-[10px] text-slate-500 font-medium max-w-37.5 truncate">
-                      {row.late_reason || row.alasan_izin || '-'}
-                    </td>
-                    <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase italic">
-                        <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Kantor Pusat'}</div>
-                    </td>
-                  </tr>
-                )) : (
+                ) : data.length > 0 ? data.map((row, i) => {
+                  const currentStatus = getDisplayStatus(row);
+                  return (
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors group not-italic">
+                      <td className="px-8 py-5">
+                        <p className="font-black text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{row.nama_karyawan}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">{row.user?.jabatan || '-'}</p>
+                      </td>
+                      <td className="px-8 py-5 text-center text-xs font-bold text-slate-600 uppercase">
+                        {row.tanggal_absen ? new Date(row.tanggal_absen).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric'}) : '-'}
+                      </td>
+                      <td className="px-8 py-5 text-center text-sm font-black text-slate-700">
+                          {row.jam_masuk?.slice(0,5) || '--:--'} <span className="text-slate-200 mx-1">|</span> {row.jam_pulang?.slice(0,5) || '--:--'}
+                      </td>
+                      <td className="px-8 py-5 text-center">
+                        <div className="flex flex-wrap justify-center gap-1.5">
+                          <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                            currentStatus === 'hadir' ? 'bg-emerald-100 text-emerald-700' : 
+                            currentStatus === 'telat' ? 'bg-rose-100 text-rose-700' : 
+                            currentStatus === 'alpha' ? 'bg-slate-200 text-slate-500' : 
+                            'bg-amber-100 text-amber-700'
+                          }`}>
+                              {currentStatus}
+                          </span>
+                          {row.is_permission && (
+                              <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200">IZIN</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 text-center text-[10px] text-slate-500 font-medium max-w-37.5 truncate">
+                        {row.late_reason || row.alasan_izin || '-'}
+                      </td>
+                      <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase italic">
+                          <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-blue-400" />{row.user?.branch?.nama_cabang || 'Kantor Pusat'}</div>
+                      </td>
+                    </tr>
+                  );
+                }) : (
                   <tr><td colSpan="6" className="py-24 text-center text-slate-300">Data tidak ditemukan</td></tr>
                 )}
               </tbody>
