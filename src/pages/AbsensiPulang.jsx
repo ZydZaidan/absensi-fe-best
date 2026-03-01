@@ -46,7 +46,7 @@ const AbsensiPulang = () => {
         return { 
             lat: parseFloat(userData.cabang.latitude), 
             lng: parseFloat(userData.cabang.longitude),
-            radius: userData.cabang.radius_meter || 50 
+            radius: parseInt(userData.cabang.radius_meter) || 50
         };
     }
     // Fallback darurat ke Kantor Pusat Jakarta k
@@ -140,12 +140,29 @@ const AbsensiPulang = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in">
               <div className="lg:col-span-2 h-100 md:h-125 rounded-4xl overflow-hidden shadow-inner border border-slate-200 z-0 relative grayscale-[0.3]">
                 {location && (
-                  <MapContainer center={[location.lat, location.lng]} zoom={17} zoomControl={false} className="h-full w-full">
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <Circle center={[OFFICE_COORDS.lat, OFFICE_COORDS.lng]} radius={OFFICE_COORDS.radius} pathOptions={{ color: '#ea580c', fillColor: '#ea580c', fillOpacity: 0.2 }} />
-                    <Marker position={[location.lat, location.lng]} />
-                    <RecenterMap coords={location} />
-                  </MapContainer>
+                <MapContainer 
+                  center={[OFFICE_COORDS.lat, OFFICE_COORDS.lng]} // Fokus ke Kantor dulu
+                  zoom={17} 
+                  zoomControl={false} 
+                  className="h-full w-full"
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  
+                  {/* Lingkaran Radius Kantor */}
+                  <Circle 
+                    center={[OFFICE_COORDS.lat, OFFICE_COORDS.lng]} 
+                    radius={OFFICE_COORDS.radius} 
+                    pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.2 }} 
+                  />
+                  
+                  {/* Marker Lokasi User (Hanya muncul jika GPS aktif) */}
+                  {location && (
+                    <>
+                      <Marker position={[location.lat, location.lng]} />
+                      <RecenterMap coords={location} />
+                    </>
+                  )}
+                </MapContainer>
                 )}
               </div>
 
