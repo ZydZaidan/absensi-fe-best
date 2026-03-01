@@ -38,6 +38,7 @@ const Absensi = () => {
   const [lateReason, setLateReason] = useState('');
   const [accuracy, setAccuracy] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isAbsenDanIzin, setIsAbsenDanIzin] = useState(false);
 
   //koordinat dinamis
   const OFFICE_COORDS = useMemo(() => {
