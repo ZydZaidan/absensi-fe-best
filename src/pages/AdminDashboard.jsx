@@ -118,7 +118,9 @@ const AdminDashboard = () => {
               <h2 className="md:text-4xl text-2xl font-black flex items-center gap-2 italic">
                 {adminData?.name || 'Admin'} 
               </h2>
-              <p className="text-xs opacity-70 mt-1 font-medium">{adminData?.jabatan || 'Staff'} • PT BEST</p>
+              <p className="text-xs opacity-70 mt-1 font-medium">
+                {adminData?.jabatan || 'Staff'} • {adminData?.cabang?.nama_cabang || 'PT BEST'}
+              </p>
             </div>
 
             <div className="text-right border-l border-white/20 pl-4">

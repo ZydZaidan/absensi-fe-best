@@ -113,7 +113,9 @@ const Dashboard = () => {
               <h2 className="md:text-4xl text-2xl font-black flex items-center gap-2 italic">
                 {userData?.name || 'Karyawan'} 
               </h2>
-              <p className="text-xs opacity-70 mt-1 font-medium">{userData?.jabatan || 'Staff'} • PT BEST</p>
+              <p className="text-xs opacity-70 mt-1 font-medium">
+                {userData?.jabatan || 'Staff'} • {userData?.cabang?.nama_cabang || 'PT BEST'}
+              </p>
             </div>
 
             <div className="text-right border-l border-white/20 pl-4">
